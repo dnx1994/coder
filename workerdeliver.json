@@ -16,30 +16,8 @@
         -32
       ],
       "id": "0a516726-4c80-403d-80ef-d2444359c06c",
-      "name": "AI Agent1"
-    },
-    {
-      "parameters": {
-        "model": "gemma4:latest",
-        "options": {
-          "think": true,
-          "temperature": 0.7
-        }
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
-      "typeVersion": 1,
-      "position": [
-        -224,
-        144
-      ],
-      "id": "5958610f-a396-4ea7-ab6e-1f342d79b965",
-      "name": "Ollama Chat Model1",
-      "credentials": {
-        "ollamaApi": {
-          "id": "aRHkucMTxkC455Z2",
-          "name": "Ollama account"
-        }
-      }
+      "name": "AI Agent1",
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -132,9 +110,7 @@
                   }
                 ],
                 "combinator": "and"
-              },
-              "renameOutput": true,
-              "outputKey": "General"
+              }
             },
             {
               "conditions": {
@@ -180,27 +156,13 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        160,
-        144
+        80,
+        256
       ],
       "id": "97c72d1e-00e6-41dc-9321-cd182f75938d",
       "name": "Structured Output Parser",
       "retryOnFail": false,
       "maxTries": 5,
-      "onError": "continueErrorOutput"
-    },
-    {
-      "parameters": {
-        "jsCode": "// 1. Tomamos el texto plano que viene de la IA\nlet textoInvalido = $json.output;\n\n// 2. Reemplazamos las comillas simples por comillas dobles para que sea un JSON válido\nlet textoValido = textoInvalido.replace(/'/g, '\"');\n\n// 3. Lo convertimos en un objeto JSON nativo de JavaScript\nlet objetoJson = JSON.parse(textoValido);\n\n// 4. Devolvemos el resultado limpio a n8n\nreturn [ { json: objetoJson } ];;"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        0,
-        336
-      ],
-      "id": "fb98611d-7454-4b73-a7ac-dab957834408",
-      "name": "Code in JavaScript",
       "onError": "continueErrorOutput"
     },
     {
@@ -284,30 +246,6 @@
     {
       "parameters": {
         "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
-        "text": "=Con que necesita ayuda? :)",
-        "additionalFields": {
-          "appendAttribution": false
-        }
-      },
-      "type": "n8n-nodes-base.telegram",
-      "typeVersion": 1.2,
-      "position": [
-        704,
-        224
-      ],
-      "id": "9a5d7416-3678-4191-ad67-d65723db7201",
-      "name": "Send a text message2",
-      "webhookId": "fb2a9985-8cf6-4af2-92b5-9c2bf86d2e98",
-      "credentials": {
-        "telegramApi": {
-          "id": "LaCSqupB8onn1Ek0",
-          "name": "Telegram account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
         "text": "=Veamos",
         "additionalFields": {
           "appendAttribution": false
@@ -355,19 +293,6 @@
     },
     {
       "parameters": {
-        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\n\n\nreturn [{name:\"mati\"}];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -336,
-        -48
-      ],
-      "id": "a8fbbff9-4876-4911-bf90-90a2830ed76c",
-      "name": "Code in JavaScript1"
-    },
-    {
-      "parameters": {
         "model": {
           "__rl": true,
           "value": "gpt-6-luna",
@@ -391,6 +316,233 @@
           "name": "OpenAI account"
         }
       }
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "Vhe84E7Ge9XZ4oVR",
+          "mode": "list",
+          "cachedResultName": "errors",
+          "cachedResultUrl": "/projects/Oid9NSNdW11bP5VP/datatables/Vhe84E7Ge9XZ4oVR"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "detalle": "=error en worker deliver : {{ $('Telegram Trigger').item.json.message.text }}",
+            "contacto": "={{ $('Telegram Trigger').item.json.message.chat.id }} - {{ $('Telegram Trigger').item.json.message.chat.first_name }} {{ $('Telegram Trigger').item.json.message.chat.last_name }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "detalle",
+              "displayName": "detalle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "contacto",
+              "displayName": "contacto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        176,
+        688
+      ],
+      "id": "0bf03c1d-5b79-402a-9bc8-da9c06621e05",
+      "name": "Insert row"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        880,
+        176
+      ],
+      "id": "2dbfb423-9d56-480d-9e9f-188a231a8fcb",
+      "name": "Send a text message2",
+      "webhookId": "fb2a9985-8cf6-4af2-92b5-9c2bf86d2e98",
+      "credentials": {
+        "telegramApi": {
+          "id": "LaCSqupB8onn1Ek0",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "knowledge_base",
+        "toolDescription": "usa esta base de conocimiento para responderle al usuario sobre el el producto totem para ayudar al cliente",
+        "memoryKey": {
+          "__rl": true,
+          "value": "AsistenteTotem",
+          "mode": "list",
+          "cachedResultName": "AsistenteTotem"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.2,
+      "position": [
+        608,
+        576
+      ],
+      "id": "d1947ad3-421e-46ac-aa89-65993412ad96",
+      "name": "Query Data Tool"
+    },
+    {
+      "parameters": {
+        "model": "nomic-embed-text:latest"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+      "typeVersion": 1,
+      "position": [
+        624,
+        688
+      ],
+      "id": "ba20d0f1-698c-4113-9adb-ee1b0dddf672",
+      "name": "Embeddings Ollama",
+      "credentials": {
+        "ollamaApi": {
+          "id": "aRHkucMTxkC455Z2",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-6-luna",
+          "mode": "list"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        432,
+        432
+      ],
+      "id": "6363be56-7f92-4538-b0da-08099a033ba9",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "yn53XlLBMDD89Wvi",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "Vhe84E7Ge9XZ4oVR",
+          "mode": "list",
+          "cachedResultName": "errors",
+          "cachedResultUrl": "/projects/Oid9NSNdW11bP5VP/datatables/Vhe84E7Ge9XZ4oVR"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "detalle": "=error Respuesta workerDeliver : {{ $('Telegram Trigger').item.json.message.text }}",
+            "contacto": "={{ $('Telegram Trigger').item.json.message.chat.id }} - {{ $('Telegram Trigger').item.json.message.chat.first_name }} {{ $('Telegram Trigger').item.json.message.chat.last_name }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "detalle",
+              "displayName": "detalle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "contacto",
+              "displayName": "contacto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        912,
+        656
+      ],
+      "id": "c683b14f-4f9b-4172-9d80-d203c59f97b1",
+      "name": "Insert row1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Telegram Trigger').first().json.message.text }}",
+        "options": {
+          "systemMessage": "Eres un asistente tecnico  de la empresa mostaza\nUtiliza la knowledge_base para buscar informacion sobre la consulta.\nno inventes informacion y redacta una respuesta para un conpañero tecnico.\nSi no tiene una consulta clara explica que no entendiste"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        512,
+        192
+      ],
+      "id": "f218ca5c-1efa-4690-a2da-4f34fcaf9413",
+      "name": "Agente ia  docu",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').first().json.message.chat.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        528,
+        400
+      ],
+      "id": "f177c024-f1b0-485e-b570-ba006a0669a6",
+      "name": "Simple Memory"
     }
   ],
   "connections": {
@@ -402,12 +554,14 @@
             "type": "main",
             "index": 0
           }
+        ],
+        [
+          {
+            "node": "Insert row",
+            "type": "main",
+            "index": 0
+          }
         ]
-      ]
-    },
-    "Ollama Chat Model1": {
-      "ai_languageModel": [
-        []
       ]
     },
     "Telegram Trigger": {
@@ -420,11 +574,6 @@
           },
           {
             "node": "Send a text message3",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Code in JavaScript1",
             "type": "main",
             "index": 0
           }
@@ -454,7 +603,7 @@
         ],
         [
           {
-            "node": "Send a text message2",
+            "node": "Agente ia  docu",
             "type": "main",
             "index": 0
           }
@@ -488,24 +637,74 @@
         ]
       ]
     },
-    "Code in JavaScript": {
-      "main": [
-        [],
-        [
-          {
-            "node": "AI Agent1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "OpenAI Chat Model": {
       "ai_languageModel": [
         [
           {
             "node": "AI Agent1",
             "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Data Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente ia  docu",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Ollama": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Query Data Tool",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente ia  docu",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente ia  docu": {
+      "main": [
+        [
+          {
+            "node": "Send a text message2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Insert row1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Agente ia  docu",
+            "type": "ai_memory",
             "index": 0
           }
         ]
