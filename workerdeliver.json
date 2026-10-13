@@ -6,7 +6,8 @@
         "text": "={{ $json.message.text }}",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "Analiza el siguiente mensaje del usuario y clasifícalo estrictamente en una de estas categorías: 'Totem', 'Precios', '' o 'General'. \nResponde únicamente en formato JSON con la estructura: {\"categoria\": \"nombre_de_la_categoria\"}"
+          "systemMessage": "Analiza el siguiente mensaje del usuario y clasifícalo estrictamente en una de estas categorías: 'Totem', 'Precios', '' o 'General'. \nResponde únicamente en formato JSON con la estructura: {\"categoria\": \"nombre_de_la_categoria\"}",
+          "maxIterations": 10
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
@@ -504,8 +505,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        912,
-        656
+        992,
+        624
       ],
       "id": "c683b14f-4f9b-4172-9d80-d203c59f97b1",
       "name": "Insert row1"
@@ -543,6 +544,52 @@
       ],
       "id": "f177c024-f1b0-485e-b570-ba006a0669a6",
       "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "sendTo": "mda.acosta94@gmail.com",
+        "subject": "ERROR LOCOOOOOOO",
+        "message": "ojo se rompio el agente de tu agente  reviasa la bdd de errores",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1216,
+        624
+      ],
+      "id": "91fc1921-ea09-4eed-9541-3e2a7a09d425",
+      "name": "Send a message",
+      "webhookId": "5d2d9342-b445-403a-b8b9-569bf73d1b22",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "zhpWMWEwnY0RMirr",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "mda.acosta94@gmail.com",
+        "subject": "ERROR LOCOOOOOOO",
+        "message": "ojo se rompio el agente de tu agente  reviasa la bdd de errores",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        320,
+        688
+      ],
+      "id": "e50df8bf-27f8-480e-b125-236ca18eaa37",
+      "name": "Send a message1",
+      "webhookId": "5d2d9342-b445-403a-b8b9-569bf73d1b22",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "zhpWMWEwnY0RMirr",
+          "name": "Gmail account"
+        }
+      }
     }
   ],
   "connections": {
@@ -648,6 +695,17 @@
         ]
       ]
     },
+    "Insert row": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Query Data Tool": {
       "ai_tool": [
         [
@@ -676,6 +734,17 @@
           {
             "node": "Agente ia  docu",
             "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert row1": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
             "index": 0
           }
         ]
