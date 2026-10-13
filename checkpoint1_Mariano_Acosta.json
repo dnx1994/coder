@@ -560,7 +560,13 @@
       ],
       "id": "91fc1921-ea09-4eed-9541-3e2a7a09d425",
       "name": "Send a message",
-      "webhookId": "5d2d9342-b445-403a-b8b9-569bf73d1b22"
+      "webhookId": "5d2d9342-b445-403a-b8b9-569bf73d1b22",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "zhpWMWEwnY0RMirr",
+          "name": "Gmail account"
+        }
+      }
     },
     {
       "parameters": {
@@ -577,7 +583,13 @@
       ],
       "id": "e50df8bf-27f8-480e-b125-236ca18eaa37",
       "name": "Send a message1",
-      "webhookId": "5d2d9342-b445-403a-b8b9-569bf73d1b22"
+      "webhookId": "5d2d9342-b445-403a-b8b9-569bf73d1b22",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "zhpWMWEwnY0RMirr",
+          "name": "Gmail account"
+        }
+      }
     }
   ],
   "connections": {
