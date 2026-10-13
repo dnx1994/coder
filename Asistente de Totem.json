@@ -1,0 +1,432 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "jsonExample",
+        "jsonExample": "  \n{\n\"mensaje\": \n\"no veo un item en el totem\", \n\"chatid\": \n\"1792887193\"\n  \n}"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -400,
+        -48
+      ],
+      "id": "83971db8-e3b1-4441-a561-85334d6737c7",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.mensaje }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Eres un asistente de inteligencia artificial especializado en soporte técnico y atención al cliente. Tu única tarea es analizar el mensaje de un usuario e identificar a cuál de los siguientes problemas se refiere.\n\nDebes responder ÚNICAMENTE con un objeto JSON válido, sin usar bloques de código (Markdown), sin texto adicional, ni explicaciones. \n\nLas opciones válidas para el valor de \"categoria\" son estrictamente estas tres:\n- \"Imagen incorrecta\"\n- \"Problemas con el catalogo de delivery\"\n- \"No aparece un articulo\"\n\nFormato de respuesta requerido:\n{\"categoria\": \"VALOR_SELECCIONADO\"}\n\nCRITERIOS DE CLASIFICACIÓN:\n1. \"Imagen incorrecta\": La foto no corresponde al producto, se ve mal, está rotada o muestra un artículo diferente.\n2. \"Problemas con el catalogo de delivery\": El catálogo no se sincroniza con apps de reparto (Rappi, Uber Eats, etc.), los precios están mal en delivery, o la tienda figura cerrada erróneamente en esas apps.\n3. \"No aparece un articulo\": El producto específico no figura en el buscador, menú o catálogo general, está oculto o no se encuentra.\n\nEJEMPLOS:\nMensaje: \"La foto del combo de sushi muestra empanadas.\"\nResultado: {\"categoria\": \"Imagen incorrecta\"}\n\nMensaje: \"Modifiqué los precios en mi sistema pero en PedidosYa siguen saliendo los viejos.\"\nResultado: {\"categoria\": \"Problemas con el catalogo de delivery\"}\n\nMensaje: \"No encuentro el helado de menta granizada por ningún lado en la web.\"\nResultado: {\"categoria\": \"No aparece un articulo\"}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -176,
+        -48
+      ],
+      "id": "78c340bf-2ff5-43ee-bd7c-b9568721f30b",
+      "name": "AI Agent",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"categoria\":\"string\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -16,
+        160
+      ],
+      "id": "2622db10-9e9f-4e63-b554-2f8009d654f3",
+      "name": "Structured Output Parser",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        -192,
+        160
+      ],
+      "id": "a2551b14-3393-47c5-aad4-782249009856",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.categoria }}",
+                    "rightValue": "No aparece un articulo",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "cbfaefe5-700b-4a2c-8947-979675d4ff0d"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "3874bcb9-1bda-4acb-9d93-f7e6f87ae0a3",
+                    "leftValue": "={{ $json.output.categoria }}",
+                    "rightValue": "Problemas con el catalogo de delivery",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "e7a25bd1-759e-4e02-b746-89c8b75a9c64",
+                    "leftValue": "={{ $json.output.categoria }}",
+                    "rightValue": "Imagen incorrecta",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        192,
+        -48
+      ],
+      "id": "352fbf70-77b3-4b05-b80a-41c04394fc9e",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "MYcVzlJ9rBjks2FD",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/MYcVzlJ9rBjks2FD",
+          "cachedResultName": "Asistente Totem Verificador de Articulos Precios"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "idchat": "={{ $('When Executed by Another Workflow').item.json.chatid }}",
+            "mensaje": "={{ $('When Executed by Another Workflow').item.json.mensaje }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "idchat",
+              "displayName": "idchat",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "mensaje",
+              "displayName": "mensaje",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        480,
+        -112
+      ],
+      "id": "c27e605e-2110-405f-b5ed-414a7e118a7a",
+      "name": "Call 'Asistente Totem Verificador de Articulos Precios'"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('When Executed by Another Workflow').item.json.chatid }}",
+        "text": "=Lo siento todavia no me enseñaron eso :)",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        560,
+        192
+      ],
+      "id": "c007a9c0-8622-4f26-9ca2-724b55cea9ec",
+      "name": "Send a text message",
+      "webhookId": "fb2a9985-8cf6-4af2-92b5-9c2bf86d2e98",
+      "credentials": {
+        "telegramApi": {
+          "id": "LaCSqupB8onn1Ek0",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('When Executed by Another Workflow').item.json.chatid }}",
+        "text": "=Entonces no te aparece un articulo",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        368,
+        -288
+      ],
+      "id": "933e3094-259b-44a1-bb5c-7f5465d9cf8c",
+      "name": "Send a text message1",
+      "webhookId": "fb2a9985-8cf6-4af2-92b5-9c2bf86d2e98",
+      "credentials": {
+        "telegramApi": {
+          "id": "LaCSqupB8onn1Ek0",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-6-luna",
+          "mode": "list",
+          "cachedResultName": "gpt-6-luna"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -320,
+        240
+      ],
+      "id": "a924b434-f05f-4f70-b515-49abb619e771",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "yn53XlLBMDD89Wvi",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "Vhe84E7Ge9XZ4oVR",
+          "mode": "list",
+          "cachedResultName": "errors",
+          "cachedResultUrl": "/projects/Oid9NSNdW11bP5VP/datatables/Vhe84E7Ge9XZ4oVR"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "detalle": "=error Respuesta AnalizadorTotem : {{ $('When Executed by Another Workflow').item.json.mensaje }}",
+            "contacto": "={{ $('When Executed by Another Workflow').item.json.chatid }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "detalle",
+              "displayName": "detalle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "contacto",
+              "displayName": "contacto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        240
+      ],
+      "id": "49922327-2cee-4f24-960a-6c8b5b6e37e9",
+      "name": "Insert row1"
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Insert row1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ],
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        []
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Call 'Asistente Totem Verificador de Articulos Precios'",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "mensaje": "no veo un item en el totem",
+        "chatid": "1792887193"
+      }
+    ]
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "dea47ab8da2b7cc698fb9ff4bd68a2953a1e3c919cf1e296c03fad42edadfc7b"
+  }
+}
