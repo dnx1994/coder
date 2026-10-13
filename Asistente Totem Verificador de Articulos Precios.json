@@ -1,0 +1,953 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.mensaje }}",
+        "options": {
+          "systemMessage": "Eres un asistente experto en extracción de información de texto. Tu única tarea es encontrar \"códigos de artículos\" y \"códigos de local\" dentro del mensaje proporcionado.\n\nDEFINICIONES Y REGLAS DE EXTRACCIÓN:\n- \"cod_articulo\": Identificador de artículo (habitualmente números de hasta 5 caracteres, opcionalmente con una sola letra).\n- \"cod_local\": Código de tienda física (habitualmente empieza con 'M' para locales propios o 'FM' para franquicias, en mayúsculas).\n\nINSTRUCCIONES STRICTAS DE EXTRACCIÓN:\n1. Extrae ÚNICAMENTE la información que esté explícitamente presente en el mensaje.\n2. NUNCA inventes, deduzcas ni asumas valores que no aparezcan de forma literal en el texto.\n3. Si en el mensaje NO se menciona un \"código de artículo\", debes devolver null en la clave \"cod_articulo\".\n4. Si en el mensaje NO se menciona un \"código de local\", debes devolver null en la clave \"cod_local\".\n5. No incluyas cadenas como \"None\", \"N/A\" ni textos descriptivos; usa el valor nulo primitivo (null).\n\nFORMATO DE SALIDA (JSON estrictamente válido):\n{\n  \"cod_articulo\": \"código encontrado\" o null,\n  \"cod_local\": \"código encontrado\" o null\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        864,
+        1392
+      ],
+      "id": "62a7437e-5284-4c95-9e1b-efc080c727f9",
+      "name": "AI Agent2",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.cod_articulo }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "empty",
+                      "singleValue": true
+                    },
+                    "id": "41e6ee7f-9c75-45f4-9722-2e6b387530cf"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "a47f3f73-6d88-435c-9032-314df3e07c45",
+                    "leftValue": "={{ $json.cod_local }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "empty",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "d96971f5-109f-4584-9b15-2d397415533e",
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1424,
+        1440
+      ],
+      "id": "cb430d37-0223-4d5a-923d-2d51960e29fe",
+      "name": "Switch2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Obtener el texto que devuelve el nodo 'AI Agent'\nconst rawText = $json.output || \"\";\nlet reintento =0;\n// 2. Limpiar bloques de código Markdown (```json y ```) y saltos de línea\nlet cleaned = rawText\n  .replace(/```json/gi, '')\n  .replace(/```/g, '')\n  .trim();\n\nlet cod_articulo = null;\nlet cod_local = null;\n\ntry {\n  // 3. Parsear el string a un objeto JSON\n  const parsed = JSON.parse(cleaned);\n  \n  // 4. Asegurar que \"null\" en string pase a ser null nativo\n  cod_articulo = (parsed.cod_articulo === 'null' || parsed.cod_articulo === undefined) ? null : parsed.cod_articulo;\n  cod_local = (parsed.cod_local === 'null' || parsed.cod_local === undefined) ? null : parsed.cod_local;\n\n} catch (error) {\n  // Si no viene un JSON válido, quedan en null\n}\n\n// 5. Retornar el objeto listo para n8n\nreturn {\n  cod_articulo,\n  cod_local,\n  reintento\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1232,
+        1392
+      ],
+      "id": "ab33e4e1-21a4-4981-b336-1e10dcc0d4b2",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "={{ $('When Executed by Another Workflow').item.json.idchat }}",
+        "message": "={{ $('a reintentar1').item.json.mensaje_solicitud }}",
+        "responseType": "freeText",
+        "options": {
+          "limitWaitTime": {
+            "values": {
+              "resumeAmount": 45,
+              "resumeUnit": "minutes"
+            }
+          },
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1872,
+        1440
+      ],
+      "id": "a7fecb92-8226-4d32-8554-202f5de7bc16",
+      "name": "Send a text message3",
+      "webhookId": "86ddc0a2-d483-49de-a5be-395df680531a",
+      "credentials": {
+        "telegramApi": {
+          "id": "LaCSqupB8onn1Ek0",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.data.text }}",
+        "options": {
+          "systemMessage": "Eres un asistente experto en extracción de información de texto. Tu única tarea es encontrar \"códigos de artículos\" y \"códigos de local\" dentro del mensaje proporcionado.\n\nDEFINICIONES Y REGLAS DE EXTRACCIÓN:\n- \"cod_articulo\": Identificador de artículo (habitualmente números de hasta 5 caracteres, opcionalmente con una sola letra).\n- \"cod_local\": Código de tienda física (habitualmente empieza con 'M' para locales propios o 'FM' para franquicias, en mayúsculas).\n\nINSTRUCCIONES STRICTAS DE EXTRACCIÓN:\n1. Extrae ÚNICAMENTE la información que esté explícitamente presente en el mensaje.\n2. NUNCA inventes, deduzcas ni asumas valores que no aparezcan de forma literal en el texto.\n3. Si en el mensaje NO se menciona un \"código de artículo\", debes devolver null en la clave \"cod_articulo\".\n4. Si en el mensaje NO se menciona un \"código de local\", debes devolver null en la clave \"cod_local\".\n5. No incluyas cadenas como \"None\", \"N/A\" ni textos descriptivos; usa el valor nulo primitivo (null).\n\nFORMATO DE SALIDA (JSON estrictamente válido):\n{\n  \"cod_articulo\": \"código encontrado\" o null,\n  \"cod_local\": \"código encontrado\" o null\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        2080,
+        1440
+      ],
+      "id": "22a21467-62e4-412e-9f83-a0dadbc0245e",
+      "name": "AI Agent3",
+      "retryOnFail": true,
+      "maxTries": 5
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Obtener el texto que devuelve el nodo 'AI Agent'\nconst rawText = $json.output || \"\";\nlet reintento = $('Code in JavaScript1').first().json.reintento\nreintento++;\n// 2. Limpiar bloques de código Markdown (```json y ```) y saltos de línea\nlet cleaned = rawText\n  .replace(/```json/gi, '')\n  .replace(/```/g, '')\n  .trim();\n\nlet cod_articulo = null;\nlet cod_local = null;\n\ntry {\n  // 3. Parsear el string a un objeto JSON\n  const parsed = JSON.parse(cleaned);\n  \n  // 4. Asegurar que \"null\" en string pase a ser null nativo\n  cod_articulo = (parsed.cod_articulo === 'null' || parsed.cod_articulo === undefined) ? null : parsed.cod_articulo;\n  cod_local = (parsed.cod_local === 'null' || parsed.cod_local === undefined) ? null : parsed.cod_local;\n\n} catch (error) {\n  // Si no viene un JSON válido, quedan en null\n}\n\n// 5. Retornar el objeto listo para n8n\nreturn {\n  cod_articulo,\n  cod_local,\n  reintento\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2464,
+        1440
+      ],
+      "id": "7b9b6614-5ac9-4173-9d68-9c0cbfc64152",
+      "name": "Code in JavaScript5"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.cod_articulo }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "empty",
+                      "singleValue": true
+                    },
+                    "id": "41e6ee7f-9c75-45f4-9722-2e6b387530cf"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "a47f3f73-6d88-435c-9032-314df3e07c45",
+                    "leftValue": "={{ $json.cod_local }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "empty",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "d96971f5-109f-4584-9b15-2d397415533e",
+                    "leftValue": "=",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        2688,
+        1424
+      ],
+      "id": "7157abca-bbc7-4e59-9047-3bf2134c0fae",
+      "name": "Switch3"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://url/Login",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "prestador",
+              "value": "admin"
+            },
+            {
+              "name": "contraseña",
+              "value": "admin"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2880,
+        1728
+      ],
+      "id": "e3c9f8ef-b12b-4500-8902-79dc100978a9",
+      "name": "HTTP Request4",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "http://url/Precios",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "codigo",
+              "value": "={{ $('Code in JavaScript5').item.json.cod_articulo }}"
+            },
+            {
+              "name": "local",
+              "value": "={{ $('Code in JavaScript5').item.json.cod_local }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $json.token }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        3104,
+        1728
+      ],
+      "id": "ef447936-5ff0-4c48-9d8b-8fd940462e13",
+      "name": "HTTP Request5"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Obtener items recibidos del HTTP Request\nconst items = $input.all();\n\n// Verificar si el array está vacío o si el precio es 0\nconst esVacioOPrecioCero = items.length === 0 || items.every(item => Number(item.json.precio || 0) === 0);\n\nlet mensaje = \"\";\n\nif (esVacioOPrecioCero) {\n  mensaje = \"Tu artículo no se ve porque tiene precio 0.\";\n} else {\n  mensaje = \"Parece bien configurado, por las dudas verifique si bajaron los precios.\";\n}\n\nreturn { mensaje };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3328,
+        1728
+      ],
+      "id": "2bf111fc-3a32-4183-a870-e63a320dc3f2",
+      "name": "Code in JavaScript6"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('When Executed by Another Workflow').item.json.idchat }}",
+        "text": "={{ $json.mensaje }}. Abrazo",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3552,
+        1728
+      ],
+      "id": "4e1da4db-5093-41af-997e-36afde6fbbf2",
+      "name": "Send a text message4",
+      "webhookId": "df43ff40-682d-4f26-b12f-8d1acd9b1274",
+      "credentials": {
+        "telegramApi": {
+          "id": "LaCSqupB8onn1Ek0",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://url/Login",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "prestador",
+              "value": "admin"
+            },
+            {
+              "name": "contraseña",
+              "value": "admin"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1808,
+        1824
+      ],
+      "id": "d39234be-ee76-46f3-a19b-d4a97fa211f5",
+      "name": "HTTP Request6",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "http://urlPrecios",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "codigo",
+              "value": "={{ $('Code in JavaScript1').item.json.cod_articulo }}"
+            },
+            {
+              "name": "local",
+              "value": "={{ $('Code in JavaScript1').item.json.cod_local }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $json.token }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2032,
+        1824
+      ],
+      "id": "ce75e6da-665c-4f21-8e72-ed045542601f",
+      "name": "HTTP Request7"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Obtener items recibidos del HTTP Request\nconst items = $input.all();\n\n// Verificar si el array está vacío o si el precio es 0\nconst esVacioOPrecioCero = items.length === 0 || items.every(item => Number(item.json.precio || 0) === 0);\n\nlet mensaje = \"\";\n\nif (esVacioOPrecioCero) {\n  mensaje = \"Tu artículo no se ve porque tiene precio 0.\";\n} else {\n  mensaje = \"Parece bien configurado, por las dudas verifique si bajaron los precios.\";\n}\n\nreturn { mensaje };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2256,
+        1824
+      ],
+      "id": "5a258ec0-6e2f-405f-ab72-c5ab280125cd",
+      "name": "Code in JavaScript7"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('When Executed by Another Workflow').item.json.idchat }}",
+        "text": "={{ $json.mensaje }}. Abrazo",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2480,
+        1824
+      ],
+      "id": "72fd2021-515a-4924-afbb-1417aa517155",
+      "name": "Send a text message5",
+      "webhookId": "df43ff40-682d-4f26-b12f-8d1acd9b1274",
+      "credentials": {
+        "telegramApi": {
+          "id": "LaCSqupB8onn1Ek0",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-6-luna",
+          "mode": "list",
+          "cachedResultName": "gpt-6-luna"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        864,
+        1632
+      ],
+      "id": "b1f3a0d6-7fed-4914-bccd-f5427897a430",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "yn53XlLBMDD89Wvi",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "gemma4:latest",
+        "options": {
+          "think": true,
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        1904,
+        1680
+      ],
+      "id": "18a038cf-5f26-45f9-b0f3-383519950bb2",
+      "name": "Ollama Chat Model3",
+      "credentials": {
+        "ollamaApi": {
+          "id": "aRHkucMTxkC455Z2",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-6-luna",
+          "mode": "list",
+          "cachedResultName": "gpt-6-luna"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        2064,
+        1648
+      ],
+      "id": "fd46552f-4d0f-48eb-bd59-e7d8b01823e9",
+      "name": "OpenAI Chat Model3",
+      "credentials": {
+        "openAiApi": {
+          "id": "yn53XlLBMDD89Wvi",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Obtener los valores directamente de las variables del nodo anterior\nconst cod_articulo = $input.first().json.cod_articulo || null;\nconst cod_local = $input.first().json.cod_local || null;\n\n// 2. Determinar qué campos faltan\nconst faltantes = [];\n\nif (!cod_articulo || cod_articulo === 'null') {\n  faltantes.push(\"código de artículo\");\n}\n\nif (!cod_local || cod_local === 'null') {\n  faltantes.push(\"código de local\");\n}\n\n// 3. Armar el mensaje de solicitud\nlet mensaje = \"\";\nif (faltantes.length > 0) {\n  mensaje = `Para continuar necesito que me pases ${faltantes.join(\" y \")}.`;\n}\n\n// 4. Retornar el resultado\nreturn {\n  mensaje_solicitud: mensaje\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1648,
+        1440
+      ],
+      "id": "cd0a33f3-e7c8-47a2-b4f3-f93fe7f3d876",
+      "name": "a reintentar1"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "Vhe84E7Ge9XZ4oVR",
+          "mode": "list",
+          "cachedResultName": "errors",
+          "cachedResultUrl": "/projects/Oid9NSNdW11bP5VP/datatables/Vhe84E7Ge9XZ4oVR"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "detalle": "=error Respuesta AnalizadorTotem : {{ $('When Executed by Another Workflow').item.json.mensaje }}",
+            "contacto": "={{ $('When Executed by Another Workflow').item.json.chatid }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "detalle",
+              "displayName": "detalle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "contacto",
+              "displayName": "contacto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1168,
+        1584
+      ],
+      "id": "d794dd3a-9a13-497e-91bd-750008bdf4ee",
+      "name": "Insert row3"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "Vhe84E7Ge9XZ4oVR",
+          "mode": "list",
+          "cachedResultName": "errors",
+          "cachedResultUrl": "/projects/Oid9NSNdW11bP5VP/datatables/Vhe84E7Ge9XZ4oVR"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "detalle": "=error login api precios : {{ $('When Executed by Another Workflow').item.json.mensaje }}",
+            "contacto": "={{ $('When Executed by Another Workflow').item.json.chatid }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "detalle",
+              "displayName": "detalle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "contacto",
+              "displayName": "contacto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1984,
+        2048
+      ],
+      "id": "702c1aac-4a2b-4a3a-9970-fc1657f93877",
+      "name": "Insert row4"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "Vhe84E7Ge9XZ4oVR",
+          "mode": "list",
+          "cachedResultName": "errors",
+          "cachedResultUrl": "/projects/Oid9NSNdW11bP5VP/datatables/Vhe84E7Ge9XZ4oVR"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "detalle": "=error login api precios : {{ $('When Executed by Another Workflow').item.json.mensaje }}",
+            "contacto": "={{ $('When Executed by Another Workflow').item.json.chatid }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "detalle",
+              "displayName": "detalle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "contacto",
+              "displayName": "contacto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        3136,
+        1952
+      ],
+      "id": "34197967-db19-4ae0-a958-e25981256fd6",
+      "name": "Insert row5"
+    }
+  ],
+  "connections": {
+    "AI Agent2": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Insert row3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch2": {
+      "main": [
+        [
+          {
+            "node": "a reintentar1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "a reintentar1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Switch2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message3": {
+      "main": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent3": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript5": {
+      "main": [
+        [
+          {
+            "node": "Switch3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch3": {
+      "main": [
+        [
+          {
+            "node": "Send a text message3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request4": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request5",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Insert row5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request5": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript6": {
+      "main": [
+        [
+          {
+            "node": "Send a text message4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request6": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request7",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Insert row4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request7": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript7": {
+      "main": [
+        [
+          {
+            "node": "Send a text message5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "a reintentar1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "dea47ab8da2b7cc698fb9ff4bd68a2953a1e3c919cf1e296c03fad42edadfc7b"
+  }
+}
