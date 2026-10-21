@@ -885,6 +885,53 @@
       ],
       "id": "26661024-00cd-40d5-bb27-484137ac093c",
       "name": "Insert row9"
+    },
+    {
+      "parameters": {
+        "sendTo": "mda.acosta94@gmail.com",
+        "subject": "ERROR LOCOOOOOOO",
+        "message": "ojo se rompio el agente de tu agente  reviasa la bdd de errores",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2496,
+        2704
+      ],
+      "id": "c1255820-4bec-466a-9414-12c122c4bb43",
+      "name": "Send a message",
+      "webhookId": "5d2d9342-b445-403a-b8b9-569bf73d1b22",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "zhpWMWEwnY0RMirr",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('When Executed by Another Workflow').item.json.idchat }}",
+        "text": "Lo siento ahora no puedo atenderte",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2272,
+        2704
+      ],
+      "id": "9ffb1e54-b0b4-4254-8509-da909b9e6b9c",
+      "name": "Send a text message7",
+      "webhookId": "7ecfa73e-7d6b-4502-8f94-ec4ed9a0ba28",
+      "credentials": {
+        "telegramApi": {
+          "id": "BtVQEsxtp2bQgTfr",
+          "name": "LechuguinBot"
+        }
+      }
     }
   ],
   "connections": {
@@ -1129,6 +1176,50 @@
         [
           {
             "node": "Send a text message3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert row3": {
+      "main": [
+        [
+          {
+            "node": "Send a text message7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert row4": {
+      "main": [
+        [
+          {
+            "node": "Send a text message7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert row5": {
+      "main": [
+        [
+          {
+            "node": "Send a text message7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message7": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
             "type": "main",
             "index": 0
           }
