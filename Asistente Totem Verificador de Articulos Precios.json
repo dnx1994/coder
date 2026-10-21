@@ -22,6 +22,29 @@
     },
     {
       "parameters": {
+        "model": "gemma4:latest",
+        "options": {
+          "think": true,
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        656,
+        1648
+      ],
+      "id": "b241d859-1e75-45a2-88bc-5c9b43d61af8",
+      "name": "Ollama Chat Model2",
+      "credentials": {
+        "ollamaApi": {
+          "id": "aRHkucMTxkC455Z2",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
         "rules": {
           "values": [
             {
@@ -716,6 +739,152 @@
       ],
       "id": "34197967-db19-4ae0-a958-e25981256fd6",
       "name": "Insert row5"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "NlKEGQymRtKvC3bJ",
+          "mode": "list",
+          "cachedResultName": "incidencias",
+          "cachedResultUrl": "/projects/Oid9NSNdW11bP5VP/datatables/NlKEGQymRtKvC3bJ"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "titulo": "Error de Precios",
+            "detalle": "=no aparece {{ $('Code in JavaScript1').item.json.cod_articulo }}  en {{ $('Code in JavaScript1').item.json.cod_local }}",
+            "estado": "Ingresado"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "titulo",
+              "displayName": "titulo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "detalle",
+              "displayName": "detalle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "resolucion",
+              "displayName": "resolucion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2656,
+        1824
+      ],
+      "id": "10a34b69-26f6-43f4-b1b0-3abdb05862ac",
+      "name": "Insert row8"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "NlKEGQymRtKvC3bJ",
+          "mode": "list",
+          "cachedResultName": "incidencias",
+          "cachedResultUrl": "/projects/Oid9NSNdW11bP5VP/datatables/NlKEGQymRtKvC3bJ"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "titulo": "Error de Precios",
+            "detalle": "=no aparece  {{ $('Code in JavaScript5').item.json.cod_articulo }} en {{ $('Code in JavaScript5').item.json.cod_local }}",
+            "estado": "Ingresado"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "titulo",
+              "displayName": "titulo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "detalle",
+              "displayName": "detalle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "resolucion",
+              "displayName": "resolucion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        3728,
+        1728
+      ],
+      "id": "26661024-00cd-40d5-bb27-484137ac093c",
+      "name": "Insert row9"
     }
   ],
   "connections": {
@@ -871,6 +1040,17 @@
         ]
       ]
     },
+    "Send a text message4": {
+      "main": [
+        [
+          {
+            "node": "Insert row9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "HTTP Request6": {
       "main": [
         [
@@ -905,6 +1085,17 @@
         [
           {
             "node": "Send a text message5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message5": {
+      "main": [
+        [
+          {
+            "node": "Insert row8",
             "type": "main",
             "index": 0
           }
