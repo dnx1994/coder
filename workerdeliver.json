@@ -603,8 +603,8 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        1696,
-        256
+        1552,
+        224
       ],
       "id": "e50af3f3-723e-465b-a3a5-d189099011a8",
       "name": "Webhook",
@@ -618,8 +618,8 @@
       "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
       "typeVersion": 1.1,
       "position": [
-        2144,
-        528
+        4032,
+        400
       ],
       "id": "22de130d-ec16-4a13-a5d6-7471b3f24cdc",
       "name": "Default Data Loader"
@@ -637,8 +637,8 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
       "typeVersion": 1.2,
       "position": [
-        1936,
-        224
+        3824,
+        192
       ],
       "id": "35c6af4d-7f5f-488e-802a-c58f945347ca",
       "name": "Insert Data to Store"
@@ -650,8 +650,8 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
       "typeVersion": 1,
       "position": [
-        1952,
-        400
+        3856,
+        384
       ],
       "id": "b1884bcc-8063-45da-bd12-fa26056c96f4",
       "name": "Embeddings Ollama1",
@@ -1551,6 +1551,266 @@
       ],
       "id": "1a4f5e88-0a92-4097-acfa-6e1c136a55fa",
       "name": "Update row(s) in Data table"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Por favor evalúa el siguiente documento:\n{{ $json.text }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Eres un asistente experto en evaluación y control de calidad de documentos. Tu tarea es leer el documento provisto, analizar su contenido y otorgarle un puntaje de 0 a 10 basándote en su relevancia, completitud y utilidad para nuestra base de conocimiento o incidencia actual. Si el puntaje es menor a 7, is_useful debe ser false; si es 7 o más, debe ser true.\nla documentacion debe ser de la empresa mostaza, ser tecnico ya sea de redes o de equipos computacionales"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        2544,
+        224
+      ],
+      "id": "aded2ce2-2ab0-459f-84dd-a49b2dbeda05",
+      "name": "AI Agent2"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-6-luna",
+          "mode": "list",
+          "cachedResultName": "gpt-6-luna"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        2416,
+        544
+      ],
+      "id": "5e815768-fa88-449c-9a88-eb45435a61f7",
+      "name": "OpenAI Chat Model3",
+      "credentials": {
+        "openAiApi": {
+          "id": "yn53XlLBMDD89Wvi",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"score\": {\n      \"type\": \"integer\",\n      \"description\": \"Puntaje del 0 al 10 que indica qué tan útil es el documento según los criterios.\"\n    },\n    \"is_useful\": {\n      \"type\": \"boolean\",\n      \"description\": \"True si el score es mayor o igual al umbral mínimo (ej. 7), de lo contrario false.\"\n    },\n    \"reason\": {\n      \"type\": \"string\",\n      \"description\": \"Breve explicación de por qué se asignó este puntaje y si contiene la información esperada.\"\n    }\n  },\n  \"required\": [\"score\", \"is_useful\", \"reason\"]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2720,
+        544
+      ],
+      "id": "9aa0bff6-36c9-42ee-830e-6ea95672fbcc",
+      "name": "Structured Output Parser2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ae253cf3-6675-44a9-95b0-2cd1ac5e0a66",
+              "leftValue": "={{ $json.output.is_useful }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2832,
+        224
+      ],
+      "id": "4c1dd5fd-a99c-4da2-99c5-78314ddb662e",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "evaluar-documento",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        1968,
+        -192
+      ],
+      "id": "94982379-b17d-46d0-ae6c-496f3cadfb62",
+      "name": "Webhook1",
+      "webhookId": "c60352ed-4845-497e-98f9-66f084522994"
+    },
+    {
+      "parameters": {
+        "promptType": "defined",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        2528,
+        -224
+      ],
+      "id": "25890519-4989-4ce6-8a81-8f77d7bd27e7",
+      "name": "AI Agent3"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "=data0",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        2240,
+        208
+      ],
+      "id": "f7b97df8-7e14-4b1e-9082-ff2a1c58502a",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "=1792887193",
+        "message": "=Documentacion rechazada\n{{ $json.output.reason }}",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double"
+          }
+        },
+        "options": {
+          "limitWaitTime": {
+            "values": {
+              "resumeAmount": 45,
+              "resumeUnit": "minutes"
+            }
+          },
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3392,
+        608
+      ],
+      "id": "b96e26f8-4a4e-4f86-b677-ab7bed8c6f22",
+      "name": "humanintheloop",
+      "webhookId": "86ddc0a2-d483-49de-a5be-395df680531a",
+      "credentials": {
+        "telegramApi": {
+          "id": "LaCSqupB8onn1Ek0",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "1792887193",
+        "binaryData": true,
+        "binaryPropertyName": "data0",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3216,
+        608
+      ],
+      "id": "d6afcaa6-416a-402e-ac2c-5f964084042f",
+      "name": "Send a document",
+      "webhookId": "6a699aa3-941a-402c-827c-6077e2d88a9a",
+      "credentials": {
+        "telegramApi": {
+          "id": "LaCSqupB8onn1Ek0",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2960,
+        496
+      ],
+      "id": "d3ea17aa-23da-4531-a6b6-c2c9ac3b818d",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a95e2223-12dc-42c4-9a21-8499f5ef196c",
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3552,
+        656
+      ],
+      "id": "ef8f0bee-de04-4edc-9826-6f30c7dd1f2c",
+      "name": "If3"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3568,
+        256
+      ],
+      "id": "70ce8d02-d9d8-42ec-a599-a11c5f7bfa9b",
+      "name": "Merge1"
     }
   ],
   "connections": {
@@ -1765,9 +2025,19 @@
       "main": [
         [
           {
-            "node": "Insert Data to Store",
+            "node": "Extract from File",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
           }
         ]
       ]
@@ -2017,6 +2287,123 @@
           {
             "node": "Agente ia  docu",
             "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent2": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser2": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "humanintheloop": {
+      "main": [
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a document": {
+      "main": [
+        [
+          {
+            "node": "humanintheloop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Send a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If3": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Insert Data to Store",
+            "type": "main",
             "index": 0
           }
         ]
