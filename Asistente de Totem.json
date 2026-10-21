@@ -20,7 +20,7 @@
         "text": "={{ $json.mensaje }}",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "Eres un asistente de inteligencia artificial especializado en soporte técnico y atención al cliente. Tu única tarea es analizar el mensaje de un usuario e identificar a cuál de los siguientes problemas se refiere.\n\nDebes responder ÚNICAMENTE con un objeto JSON válido, sin usar bloques de código (Markdown), sin texto adicional, ni explicaciones. \n\nLas opciones válidas para el valor de \"categoria\" son estrictamente estas tres:\n- \"Imagen incorrecta\"\n- \"Problemas con el catalogo de delivery\"\n- \"No aparece un articulo\"\n- \"Error Totem\"\n\nFormato de respuesta requerido:\n{\"categoria\": \"VALOR_SELECCIONADO\"}\n\nCRITERIOS DE CLASIFICACIÓN:\n1. \"Imagen incorrecta\": La foto no corresponde al producto, se ve mal, está rotada o muestra un artículo diferente.\n2. \"Problemas con el catalogo de delivery\": El catálogo no se sincroniza con apps de reparto (Rappi, Uber Eats, etc.), los precios están mal en delivery, o la tienda figura cerrada erróneamente en esas apps.\n3. \"No aparece un articulo\": El producto específico no figura en el buscador, menú o catálogo general, está oculto o no se encuentra.\n4. \"Error Totem\": un malfuncionamiento del Software del totem, como por ejemplo es traba o sale un error.\n\n\nEJEMPLOS:\nMensaje: \"La foto del combo de sushi muestra empanadas.\"\nResultado: {\"categoria\": \"Imagen incorrecta\"}\n\nMensaje: \"Modifiqué los precios en mi sistema pero en PedidosYa siguen saliendo los viejos.\"\nResultado: {\"categoria\": \"Problemas con el catalogo de delivery\"}\n\nMensaje: \"No encuentro el helado de menta granizada por ningún lado en la web.\"\nResultado: {\"categoria\": \"No aparece un articulo\"}\n\nMensaje: \"Se queda treabado guardando el pedido\"\nResultado: {\"categoria\": \"Error Totem\"}"
+          "systemMessage": "Eres un asistente de inteligencia artificial especializado en soporte técnico y atención al cliente. Tu única tarea es analizar el mensaje de un usuario e identificar a cuál de los siguientes problemas se refiere.\n\nDebes responder ÚNICAMENTE con un objeto JSON válido, sin usar bloques de código (Markdown), sin texto adicional, ni explicaciones. \n\nLas opciones válidas para el valor de \"categoria\" son estrictamente estas tres:\n- \"Imagen incorrecta\"\n- \"Problemas con el catalogo de delivery\"\n- \"No aparece un articulo\"\n\nFormato de respuesta requerido:\n{\"categoria\": \"VALOR_SELECCIONADO\"}\n\nCRITERIOS DE CLASIFICACIÓN:\n1. \"Imagen incorrecta\": La foto no corresponde al producto, se ve mal, está rotada o muestra un artículo diferente.\n2. \"Problemas con el catalogo de delivery\": El catálogo no se sincroniza con apps de reparto (Rappi, Uber Eats, etc.), los precios están mal en delivery, o la tienda figura cerrada erróneamente en esas apps.\n3. \"No aparece un articulo\": El producto específico no figura en el buscador, menú o catálogo general, está oculto o no se encuentra.\n\n\nEJEMPLOS:\nMensaje: \"La foto del combo de sushi muestra empanadas.\"\nResultado: {\"categoria\": \"Imagen incorrecta\"}\n\nMensaje: \"Modifiqué los precios en mi sistema pero en PedidosYa siguen saliendo los viejos.\"\nResultado: {\"categoria\": \"Problemas con el catalogo de delivery\"}\n\nMensaje: \"No encuentro el helado de menta granizada por ningún lado en la web.\"\nResultado: {\"categoria\": \"No aparece un articulo\"}\n"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
@@ -124,29 +124,6 @@
                     "operator": {
                       "type": "string",
                       "operation": "equals"
-                    }
-                  }
-                ],
-                "combinator": "and"
-              }
-            },
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 3
-                },
-                "conditions": [
-                  {
-                    "id": "115cd210-f937-42db-9764-285ff0b5afb9",
-                    "leftValue": "={{ $json.output.categoria }}",
-                    "rightValue": "Error Totem",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals",
-                      "name": "filter.operator.equals"
                     }
                   }
                 ],
@@ -336,8 +313,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        224,
-        240
+        272,
+        784
       ],
       "id": "49922327-2cee-4f24-960a-6c8b5b6e37e9",
       "name": "Insert row1"
@@ -514,6 +491,53 @@
       ],
       "id": "3dfe0e37-900a-40a8-80db-511090ca8133",
       "name": "OportunidadMejora"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('When Executed by Another Workflow').item.json.chatid }}",
+        "text": "Lo siento ahora no puedo atenderte",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        784
+      ],
+      "id": "2487e84a-9d50-4953-a7c2-54c9143bfc52",
+      "name": "Send a text message3",
+      "webhookId": "7ecfa73e-7d6b-4502-8f94-ec4ed9a0ba28",
+      "credentials": {
+        "telegramApi": {
+          "id": "BtVQEsxtp2bQgTfr",
+          "name": "LechuguinBot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "mda.acosta94@gmail.com",
+        "subject": "ERROR LOCOOOOOOO",
+        "message": "ojo se rompio el agente de tu agente  reviasa la bdd de errores",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        560,
+        784
+      ],
+      "id": "b443cd66-7bbf-444d-9ae8-f05afe4f4ff3",
+      "name": "Send a message1",
+      "webhookId": "5d2d9342-b445-403a-b8b9-569bf73d1b22",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "zhpWMWEwnY0RMirr",
+          "name": "Gmail account"
+        }
+      }
     }
   ],
   "connections": {
@@ -598,13 +622,6 @@
             "type": "main",
             "index": 0
           }
-        ],
-        [
-          {
-            "node": "AI Agent1",
-            "type": "main",
-            "index": 0
-          }
         ]
       ]
     },
@@ -625,6 +642,17 @@
           {
             "node": "AI Agent",
             "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert row1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message3",
+            "type": "main",
             "index": 0
           }
         ]
@@ -680,6 +708,17 @@
           {
             "node": "AI Agent1",
             "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message3": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
             "index": 0
           }
         ]
