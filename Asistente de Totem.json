@@ -20,7 +20,7 @@
         "text": "={{ $json.mensaje }}",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "Eres un asistente de inteligencia artificial especializado en soporte técnico y atención al cliente. Tu única tarea es analizar el mensaje de un usuario e identificar a cuál de los siguientes problemas se refiere.\n\nDebes responder ÚNICAMENTE con un objeto JSON válido, sin usar bloques de código (Markdown), sin texto adicional, ni explicaciones. \n\nLas opciones válidas para el valor de \"categoria\" son estrictamente estas tres:\n- \"Imagen incorrecta\"\n- \"Problemas con el catalogo de delivery\"\n- \"No aparece un articulo\"\n\nFormato de respuesta requerido:\n{\"categoria\": \"VALOR_SELECCIONADO\"}\n\nCRITERIOS DE CLASIFICACIÓN:\n1. \"Imagen incorrecta\": La foto no corresponde al producto, se ve mal, está rotada o muestra un artículo diferente.\n2. \"Problemas con el catalogo de delivery\": El catálogo no se sincroniza con apps de reparto (Rappi, Uber Eats, etc.), los precios están mal en delivery, o la tienda figura cerrada erróneamente en esas apps.\n3. \"No aparece un articulo\": El producto específico no figura en el buscador, menú o catálogo general, está oculto o no se encuentra.\n\nEJEMPLOS:\nMensaje: \"La foto del combo de sushi muestra empanadas.\"\nResultado: {\"categoria\": \"Imagen incorrecta\"}\n\nMensaje: \"Modifiqué los precios en mi sistema pero en PedidosYa siguen saliendo los viejos.\"\nResultado: {\"categoria\": \"Problemas con el catalogo de delivery\"}\n\nMensaje: \"No encuentro el helado de menta granizada por ningún lado en la web.\"\nResultado: {\"categoria\": \"No aparece un articulo\"}"
+          "systemMessage": "Eres un asistente de inteligencia artificial especializado en soporte técnico y atención al cliente. Tu única tarea es analizar el mensaje de un usuario e identificar a cuál de los siguientes problemas se refiere.\n\nDebes responder ÚNICAMENTE con un objeto JSON válido, sin usar bloques de código (Markdown), sin texto adicional, ni explicaciones. \n\nLas opciones válidas para el valor de \"categoria\" son estrictamente estas tres:\n- \"Imagen incorrecta\"\n- \"Problemas con el catalogo de delivery\"\n- \"No aparece un articulo\"\n- \"Error Totem\"\n\nFormato de respuesta requerido:\n{\"categoria\": \"VALOR_SELECCIONADO\"}\n\nCRITERIOS DE CLASIFICACIÓN:\n1. \"Imagen incorrecta\": La foto no corresponde al producto, se ve mal, está rotada o muestra un artículo diferente.\n2. \"Problemas con el catalogo de delivery\": El catálogo no se sincroniza con apps de reparto (Rappi, Uber Eats, etc.), los precios están mal en delivery, o la tienda figura cerrada erróneamente en esas apps.\n3. \"No aparece un articulo\": El producto específico no figura en el buscador, menú o catálogo general, está oculto o no se encuentra.\n4. \"Error Totem\": un malfuncionamiento del Software del totem, como por ejemplo es traba o sale un error.\n\n\nEJEMPLOS:\nMensaje: \"La foto del combo de sushi muestra empanadas.\"\nResultado: {\"categoria\": \"Imagen incorrecta\"}\n\nMensaje: \"Modifiqué los precios en mi sistema pero en PedidosYa siguen saliendo los viejos.\"\nResultado: {\"categoria\": \"Problemas con el catalogo de delivery\"}\n\nMensaje: \"No encuentro el helado de menta granizada por ningún lado en la web.\"\nResultado: {\"categoria\": \"No aparece un articulo\"}\n\nMensaje: \"Se queda treabado guardando el pedido\"\nResultado: {\"categoria\": \"Error Totem\"}"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
@@ -54,8 +54,8 @@
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "typeVersion": 1.4,
       "position": [
-        -192,
-        160
+        -144,
+        208
       ],
       "id": "a2551b14-3393-47c5-aad4-782249009856",
       "name": "Simple Memory"
@@ -124,6 +124,29 @@
                     "operator": {
                       "type": "string",
                       "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "115cd210-f937-42db-9764-285ff0b5afb9",
+                    "leftValue": "={{ $json.output.categoria }}",
+                    "rightValue": "Error Totem",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
                     }
                   }
                 ],
@@ -204,8 +227,8 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        560,
-        192
+        608,
+        64
       ],
       "id": "c007a9c0-8622-4f26-9ca2-724b55cea9ec",
       "name": "Send a text message",
@@ -318,6 +341,179 @@
       ],
       "id": "49922327-2cee-4f24-960a-6c8b5b6e37e9",
       "name": "Insert row1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('When Executed by Another Workflow').first().json.mensaje }}",
+        "options": {
+          "systemMessage": "Eres un asistente tecnico que ayudas a un colega con la documentacion que tienes.\nno inventes informacion, solo basate en la documentacion.\nsi te falta algo en ella comentalo"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        448,
+        256
+      ],
+      "id": "33ebc26e-d74c-4540-828b-3d88f74f539f",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Documentacion tecnica",
+        "memoryKey": {
+          "__rl": true,
+          "value": "AsistenteTotem",
+          "mode": "list",
+          "cachedResultName": "AsistenteTotem"
+        },
+        "topK": 8
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        784,
+        560
+      ],
+      "id": "23a70515-e4e8-4812-b16d-5f3feb93ebcb",
+      "name": "Simple Vector Store"
+    },
+    {
+      "parameters": {
+        "model": "nomic-embed-text:latest"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+      "typeVersion": 1,
+      "position": [
+        640,
+        656
+      ],
+      "id": "1d69ff73-141d-4384-9547-70b9f31343d3",
+      "name": "Embeddings Ollama",
+      "credentials": {
+        "ollamaApi": {
+          "id": "aRHkucMTxkC455Z2",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-6-luna",
+          "mode": "list",
+          "cachedResultName": "gpt-6-luna"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        288,
+        480
+      ],
+      "id": "d8911beb-6a73-4718-a698-982d5613dad1",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "yn53XlLBMDD89Wvi",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('When Executed by Another Workflow').item.json.chatid }} doment"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        480,
+        464
+      ],
+      "id": "6b55c171-8f40-492a-b750-5c2225e8d516",
+      "name": "Simple Memory1"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('When Executed by Another Workflow').first().json.chatid }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        880,
+        272
+      ],
+      "id": "556bb234-aa3a-4b2e-89a1-ef788833cc74",
+      "name": "Send a text message2",
+      "webhookId": "fb2a9985-8cf6-4af2-92b5-9c2bf86d2e98",
+      "credentials": {
+        "telegramApi": {
+          "id": "LaCSqupB8onn1Ek0",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "sGd1E5amkQpdSfkM",
+          "mode": "list",
+          "cachedResultName": "mejoras",
+          "cachedResultUrl": "/projects/Oid9NSNdW11bP5VP/datatables/sGd1E5amkQpdSfkM"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "chat": "={{ $json.result.from.id }}",
+            "mensaje": "={{ $json.result.from.first_name }}: {{ $json.result.text }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "mensaje",
+              "displayName": "mensaje",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "chat",
+              "displayName": "chat",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        832,
+        64
+      ],
+      "id": "3dfe0e37-900a-40a8-80db-511090ca8133",
+      "name": "OportunidadMejora"
     }
   ],
   "connections": {
@@ -402,6 +598,24 @@
             "type": "main",
             "index": 0
           }
+        ],
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [
+          {
+            "node": "OportunidadMejora",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
@@ -415,12 +629,67 @@
           }
         ]
       ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Ollama": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "pinData": {
     "When Executed by Another Workflow": [
       {
-        "mensaje": "no veo un item en el totem",
+        "mensaje": "se me traba el totem",
         "chatid": "1792887193"
       }
     ]
