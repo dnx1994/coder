@@ -603,8 +603,8 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        1552,
-        224
+        1824,
+        400
       ],
       "id": "e50af3f3-723e-465b-a3a5-d189099011a8",
       "name": "Webhook",
@@ -1564,8 +1564,8 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        2544,
-        224
+        2384,
+        0
       ],
       "id": "aded2ce2-2ab0-459f-84dd-a49b2dbeda05",
       "name": "AI Agent2"
@@ -1584,8 +1584,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        2416,
-        544
+        2448,
+        224
       ],
       "id": "5e815768-fa88-449c-9a88-eb45435a61f7",
       "name": "OpenAI Chat Model3",
@@ -1604,8 +1604,8 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        2720,
-        544
+        2592,
+        224
       ],
       "id": "9aa0bff6-36c9-42ee-830e-6ea95672fbcc",
       "name": "Structured Output Parser2"
@@ -1642,37 +1642,6 @@
       ],
       "id": "4c1dd5fd-a99c-4da2-99c5-78314ddb662e",
       "name": "If2"
-    },
-    {
-      "parameters": {
-        "httpMethod": "POST",
-        "path": "evaluar-documento",
-        "responseMode": "responseNode",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
-      "position": [
-        1968,
-        -192
-      ],
-      "id": "94982379-b17d-46d0-ae6c-496f3cadfb62",
-      "name": "Webhook1",
-      "webhookId": "c60352ed-4845-497e-98f9-66f084522994"
-    },
-    {
-      "parameters": {
-        "promptType": "defined",
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.7,
-      "position": [
-        2528,
-        -224
-      ],
-      "id": "25890519-4989-4ce6-8a81-8f77d7bd27e7",
-      "name": "AI Agent3"
     },
     {
       "parameters": {
@@ -1811,6 +1780,58 @@
       ],
       "id": "70ce8d02-d9d8-42ec-a599-a11c5f7bfa9b",
       "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "sGd1E5amkQpdSfkM",
+          "mode": "list",
+          "cachedResultName": "mejoras",
+          "cachedResultUrl": "/projects/Oid9NSNdW11bP5VP/datatables/sGd1E5amkQpdSfkM"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "chat": "={{ $json.result.from.id }}",
+            "mensaje": "={{ $json.result.from.first_name }}: {{ $json.result.text }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "mensaje",
+              "displayName": "mensaje",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "chat",
+              "displayName": "chat",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1472,
+        176
+      ],
+      "id": "e0ff791a-9f05-45c3-bc01-4e40ef3012b2",
+      "name": "oportunidadMejora"
     }
   ],
   "connections": {
@@ -1899,6 +1920,17 @@
         [
           {
             "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message1": {
+      "main": [
+        [
+          {
+            "node": "oportunidadMejora",
             "type": "main",
             "index": 0
           }
