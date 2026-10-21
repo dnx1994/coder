@@ -13,7 +13,7 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        -64,
+        384,
         -32
       ],
       "id": "0a516726-4c80-403d-80ef-d2444359c06c",
@@ -30,8 +30,8 @@
       "type": "n8n-nodes-base.telegramTrigger",
       "typeVersion": 1.5,
       "position": [
-        -560,
-        -48
+        -848,
+        80
       ],
       "id": "65ae9a81-a0e2-423a-8dc3-23510a55db52",
       "name": "Telegram Trigger",
@@ -143,7 +143,7 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
       "position": [
-        336,
+        784,
         -32
       ],
       "id": "a9916070-87ce-4337-bede-15aed6aa0b29",
@@ -157,7 +157,7 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        80,
+        304,
         256
       ],
       "id": "97c72d1e-00e6-41dc-9321-cd182f75938d",
@@ -214,7 +214,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        672,
+        1120,
         -128
       ],
       "id": "f6bfdbed-875c-492a-90d3-dc63cbf43517",
@@ -231,8 +231,8 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        800,
-        64
+        1248,
+        176
       ],
       "id": "72f84d54-4ae6-46da-93c1-ecfd69807212",
       "name": "Send a text message1",
@@ -255,7 +255,7 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        -368,
+        -592,
         -224
       ],
       "id": "42ba2c30-7adb-4dfb-9398-c5801f5d0baf",
@@ -279,7 +279,7 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        560,
+        1008,
         -352
       ],
       "id": "07daaa2c-94ba-4e84-92e3-7f7fa7e9062f",
@@ -306,8 +306,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        -64,
-        192
+        368,
+        176
       ],
       "id": "0704b00a-6a8d-4540-8fab-02433c18b9ea",
       "name": "OpenAI Chat Model",
@@ -364,8 +364,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        176,
-        688
+        720,
+        432
       ],
       "id": "0bf03c1d-5b79-402a-9bc8-da9c06621e05",
       "name": "Insert row"
@@ -381,8 +381,8 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        880,
-        176
+        656,
+        608
       ],
       "id": "2dbfb423-9d56-480d-9e9f-188a231a8fcb",
       "name": "Send a text message2",
@@ -409,8 +409,8 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
       "typeVersion": 1.2,
       "position": [
-        608,
-        576
+        -512,
+        864
       ],
       "id": "d1947ad3-421e-46ac-aa89-65993412ad96",
       "name": "Query Data Tool"
@@ -422,8 +422,8 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
       "typeVersion": 1,
       "position": [
-        624,
-        688
+        -512,
+        1120
       ],
       "id": "ba20d0f1-698c-4113-9adb-ee1b0dddf672",
       "name": "Embeddings Ollama",
@@ -447,8 +447,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        432,
-        432
+        -704,
+        864
       ],
       "id": "6363be56-7f92-4538-b0da-08099a033ba9",
       "name": "OpenAI Chat Model1",
@@ -505,8 +505,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        992,
-        624
+        80,
+        1056
       ],
       "id": "c683b14f-4f9b-4172-9d80-d203c59f97b1",
       "name": "Insert row1"
@@ -516,34 +516,20 @@
         "promptType": "define",
         "text": "={{ $('Telegram Trigger').first().json.message.text }}",
         "options": {
-          "systemMessage": "Eres un asistente tecnico  de la empresa mostaza\nUtiliza la knowledge_base para buscar informacion sobre la consulta.\nno inventes informacion y redacta una respuesta para un conpañero tecnico.\nSi no tiene una consulta clara explica que no entendiste"
+          "systemMessage": "=[INICIO DE CONTEXTO COMPARTIDO]\nEl usuario se llama {{ $('Telegram Trigger').first().json.message.chat.first_name }}. \nEl contexto de su última charla reciente es:\n{{ $json.historial_compacto.map(item => `Usuario: ${item.message}\\nRespuesta: ${item.response}`).join('\\n\\n') }}\n\nInformación previa resumida (Low Memory):\n- Asunto principal: {{ $json.low_memory_data[0]?.asunto_principal || 'N/A' }}\n- Puntos clave: {{ $json.low_memory_data[0]?.puntos_clave || 'N/A' }}\n- Acción requerida: {{ $json.low_memory_data[0]?.accion_requerida || 'N/A' }}\n[FIN DE CONTEXTO COMPARTIDO]\n\nEres un asistente técnico de la empresa Mostaza y gestor de incidencias. Tu función es buscar información en la knowledge_base y consultar o actualizar el estado de las incidencias en la tabla correspondiente.\n\nEstados permitidos para gestionar las incidencias:\n- Ingresado\n- En proceso\n- Solucionado\n- Rechazado\n\nUtiliza las herramientas disponibles para consultar el historial e incidencias existentes, no inventes información y redacta una respuesta clara y profesional para un compañero técnico. Si no tiene una consulta clara, explica que no entendiste."
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        512,
-        192
+        -624,
+        624
       ],
       "id": "f218ca5c-1efa-4690-a2da-4f34fcaf9413",
       "name": "Agente ia  docu",
       "retryOnFail": true,
       "maxTries": 5,
       "onError": "continueErrorOutput"
-    },
-    {
-      "parameters": {
-        "sessionIdType": "customKey",
-        "sessionKey": "={{ $('Telegram Trigger').first().json.message.chat.id }}"
-      },
-      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
-      "typeVersion": 1.4,
-      "position": [
-        528,
-        400
-      ],
-      "id": "f177c024-f1b0-485e-b570-ba006a0669a6",
-      "name": "Simple Memory"
     },
     {
       "parameters": {
@@ -555,8 +541,8 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        1216,
-        624
+        304,
+        1056
       ],
       "id": "91fc1921-ea09-4eed-9541-3e2a7a09d425",
       "name": "Send a message",
@@ -578,8 +564,8 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        320,
-        688
+        864,
+        432
       ],
       "id": "e50df8bf-27f8-480e-b125-236ca18eaa37",
       "name": "Send a message1",
@@ -590,6 +576,981 @@
           "name": "Gmail account"
         }
       }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.message.chat.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        464,
+        160
+      ],
+      "id": "d8c17548-3100-4079-8869-2a42c6fa2f5a",
+      "name": "Simple Memory1"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "4879070f-0dae-468e-a72a-c0acc2e966e1",
+        "options": {
+          "binaryPropertyName": "data",
+          "rawBody": false
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        1696,
+        256
+      ],
+      "id": "e50af3f3-723e-465b-a3a5-d189099011a8",
+      "name": "Webhook",
+      "webhookId": "4879070f-0dae-468e-a72a-c0acc2e966e1"
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        2144,
+        528
+      ],
+      "id": "22de130d-ec16-4a13-a5d6-7471b3f24cdc",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "memoryKey": {
+          "__rl": true,
+          "value": "vector_store_key",
+          "mode": "list",
+          "cachedResultName": "vector_store_key"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.2,
+      "position": [
+        1936,
+        224
+      ],
+      "id": "35c6af4d-7f5f-488e-802a-c58f945347ca",
+      "name": "Insert Data to Store"
+    },
+    {
+      "parameters": {
+        "model": "nomic-embed-text:latest"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+      "typeVersion": 1,
+      "position": [
+        1952,
+        400
+      ],
+      "id": "b1884bcc-8063-45da-bd12-fa26056c96f4",
+      "name": "Embeddings Ollama1",
+      "credentials": {
+        "ollamaApi": {
+          "id": "aRHkucMTxkC455Z2",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appw6NW0ItwCfk0ds",
+          "mode": "list",
+          "cachedResultName": "Untitled Base",
+          "cachedResultUrl": "https://airtable.com/appw6NW0ItwCfk0ds"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl2KxVfF4Hs4go2V",
+          "mode": "list",
+          "cachedResultName": "Whitelist",
+          "cachedResultUrl": "https://airtable.com/appw6NW0ItwCfk0ds/tbl2KxVfF4Hs4go2V"
+        },
+        "filterByFormula": "=telegram_id = {{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "options": {},
+        "sort": {
+          "property": []
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -592,
+        -16
+      ],
+      "id": "c60b280d-9735-4568-8515-4627ed8aacae",
+      "name": "Search records",
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ogFPdXdPeyYphkjY",
+          "name": "Airtable Personal Access Token account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.fields.Rol }}",
+                    "rightValue": "Tecnico",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "ec1cfe48-b5d8-4cad-b63c-4f661294fb8c"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Tecnico"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "e81c1342-c979-4d56-9f35-89a745537b63",
+                    "leftValue": "={{ $json.fields.Rol }}",
+                    "rightValue": "Usuario",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Usuario"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "8602acbd-fa74-4145-823a-a2191e942802",
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -368,
+        -16
+      ],
+      "id": "52fc007c-f844-47db-8ad5-e62e0c969908",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=No estas autorizado para usar este servicio",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -112,
+        -256
+      ],
+      "id": "26139e80-4e8b-4423-a199-4bba3fa1ce32",
+      "name": "Send a text message",
+      "webhookId": "e9ada78e-dc93-44f3-9af5-4785fa745ca5",
+      "credentials": {
+        "telegramApi": {
+          "id": "LaCSqupB8onn1Ek0",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "MYcVzlJ9rBjks2FD",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/MYcVzlJ9rBjks2FD",
+          "cachedResultName": "Asistente Totem Verificador de Articulos Precios"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "idchat": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+            "mensaje": "={{ $('Telegram Trigger').item.json.message.text }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "idchat",
+              "displayName": "idchat",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "mensaje",
+              "displayName": "mensaje",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1360,
+        0
+      ],
+      "id": "a644070d-930a-41df-ad61-3b604f056bb3",
+      "name": "Call 'Asistente Totem Verificador de Articulos Precios'"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appw6NW0ItwCfk0ds",
+          "mode": "list",
+          "cachedResultName": "Untitled Base",
+          "cachedResultUrl": "https://airtable.com/appw6NW0ItwCfk0ds"
+        },
+        "table": {
+          "__rl": true,
+          "value": "=tblMoHWJIHdsgqYQl",
+          "mode": "id"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id_chat": "={{ $('Telegram Trigger').item.json.message.chat.id.toString() }}",
+            "message": "={{ $('Telegram Trigger').item.json.message.text }}",
+            "agent": "agentIaDocu",
+            "response": "={{ $json.result.text }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "id_chat",
+              "displayName": "id_chat",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "agent",
+              "displayName": "agent",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "created_on",
+              "displayName": "created_on",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "response",
+              "displayName": "response",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        832,
+        608
+      ],
+      "id": "92646592-61ed-4c04-bbe9-5585ac24898f",
+      "name": "Create a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ogFPdXdPeyYphkjY",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8d62edb3-7456-47cf-89cd-1db8263584f8",
+              "leftValue": "={{ $input.all().length }}",
+              "rightValue": 5,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1184,
+        608
+      ],
+      "id": "4ad4c300-f169-4ae1-a5ae-be0a7bedfe2a",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appw6NW0ItwCfk0ds",
+          "mode": "list",
+          "cachedResultName": "Untitled Base",
+          "cachedResultUrl": "https://airtable.com/appw6NW0ItwCfk0ds"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblMoHWJIHdsgqYQl",
+          "mode": "list",
+          "cachedResultName": "AgentMemory",
+          "cachedResultUrl": "https://airtable.com/appw6NW0ItwCfk0ds/tblMoHWJIHdsgqYQl"
+        },
+        "filterByFormula": "=AND({id_chat} = '{{ $('Telegram Trigger').item.json.message.chat.id }}', {agent} = 'agentIaDocu', IS_AFTER({created_on}, DATEADD(NOW(), -30, 'minutes')))",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        992,
+        608
+      ],
+      "id": "45c9c796-e34c-4def-ab18-dd72527d7940",
+      "name": "cunsulta historial",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ogFPdXdPeyYphkjY",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.historial_compacto.map(item => `Usuario: ${item.message}\\nRespuesta: ${item.response}`).join('\\n\\n') }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Eres un asistente experto en análisis de conversaciones. Analiza el historial provisto y extrae la información requerida estrictamente en formato JSON válido, sin texto adicional ni bloques de código markdown extra, siguiendo este esquema:\n{\n  \"asunto_principal\": \"string\",\n  \"puntos_clave\": [\"string\"],\n  \"accion_requerida\": \"string\"\n}",
+          "maxIterations": 10
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1136,
+        880
+      ],
+      "id": "6dc9c00f-c28f-4342-bba4-428aff8e5db8",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appw6NW0ItwCfk0ds",
+          "mode": "list",
+          "cachedResultName": "Untitled Base",
+          "cachedResultUrl": "https://airtable.com/appw6NW0ItwCfk0ds"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblMoHWJIHdsgqYQl",
+          "mode": "list",
+          "cachedResultName": "AgentMemory",
+          "cachedResultUrl": "https://airtable.com/appw6NW0ItwCfk0ds/tblMoHWJIHdsgqYQl"
+        },
+        "filterByFormula": "=AND({id_chat} = '{{ $('Telegram Trigger').item.json.message.chat.id }}', {agent} = 'agentIaDocu', DATEADD(NOW(), -30, 'minutes'))\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -464,
+        288
+      ],
+      "id": "61dd2c33-b04b-4d02-b7cb-c6c3059af97e",
+      "name": "cunsulta historial1",
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ogFPdXdPeyYphkjY",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appw6NW0ItwCfk0ds",
+          "mode": "list",
+          "cachedResultName": "Untitled Base",
+          "cachedResultUrl": "https://airtable.com/appw6NW0ItwCfk0ds"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblql7ypazosyGCZy",
+          "mode": "list",
+          "cachedResultName": "LowAgentMemory",
+          "cachedResultUrl": "https://airtable.com/appw6NW0ItwCfk0ds/tblql7ypazosyGCZy"
+        },
+        "filterByFormula": "=AND({Session_ID} = '{{ $('Telegram Trigger').item.json.message.chat.id }}', {agent} = 'agentIaDocu', DATEADD(NOW(), -30, 'minutes'))",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -640,
+        288
+      ],
+      "id": "55dad048-3b40-4315-9c23-7528806b955b",
+      "name": "Search LowMemory",
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ogFPdXdPeyYphkjY",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b901f04a-095e-4342-9dbe-16805d1cf139",
+              "leftValue": "={{ $('cunsulta historial1').all().length}}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "81a36817-c89c-4484-8d5b-7b6647b53463",
+              "leftValue": "={{ $('Search LowMemory').all().length}}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -16,
+        288
+      ],
+      "id": "816e5096-2372-41bc-93ec-d50c340b1358",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Telegram Trigger').first().json.message.text }}",
+        "options": {
+          "systemMessage": "Eres un asistente tecnico  de la empresa mostaza\nUtiliza la knowledge_base para buscar informacion sobre la consulta.\nno inventes informacion y redacta una respuesta para un conpañero tecnico.\nSi no tiene una consulta clara explica que no entendiste"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        192,
+        416
+      ],
+      "id": "e020066b-d9af-476c-85a1-b828c750a648",
+      "name": "Agente ia  docu1",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-6-luna",
+          "mode": "list",
+          "cachedResultName": "gpt-6-luna"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1024,
+        1040
+      ],
+      "id": "942b9283-a917-4aa0-bb52-001d29740160",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "yn53XlLBMDD89Wvi",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"asunto_principal\": { \"type\": \"string\" },\n    \"puntos_clave\": { \n      \"type\": \"array\", \n      \"items\": { \"type\": \"string\" } \n    },\n    \"accion_requerida\": { \"type\": \"string\" }\n  },\n  \"required\": [\"asunto_principal\", \"puntos_clave\", \"accion_requerida\"]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1312,
+        1088
+      ],
+      "id": "39e44098-b2f2-41cc-ac5a-a38c41a1e9c6",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "appw6NW0ItwCfk0ds",
+          "mode": "list",
+          "cachedResultName": "Untitled Base",
+          "cachedResultUrl": "https://airtable.com/appw6NW0ItwCfk0ds"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblql7ypazosyGCZy",
+          "mode": "list",
+          "cachedResultName": "LowAgentMemory",
+          "cachedResultUrl": "https://airtable.com/appw6NW0ItwCfk0ds/tblql7ypazosyGCZy"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Fecha de actualización": "={{ $now }}",
+            "asunto_principal": "={{ $json.output.asunto_principal }}",
+            "accion_requerida": "={{ $json.output.accion_requerida }}",
+            "agent": "agentIaDocu",
+            "puntos_clave": "={{ $json.output.puntos_clave.join(', ') }}",
+            "Session_ID": "={{ $('Telegram Trigger').item.json.message.chat.id.toString() }}"
+          },
+          "matchingColumns": [
+            "Session_ID"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Session_ID",
+              "displayName": "Session_ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Fecha de actualización",
+              "displayName": "Fecha de actualización",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "asunto_principal",
+              "displayName": "asunto_principal",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "puntos_clave",
+              "displayName": "puntos_clave",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "accion_requerida",
+              "displayName": "accion_requerida",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "agent",
+              "displayName": "agent",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1520,
+        928
+      ],
+      "id": "19be96fd-458b-4bb1-b1d0-1351f27cbca6",
+      "name": "Create or update a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ogFPdXdPeyYphkjY",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "deleteRecord",
+        "base": {
+          "__rl": true,
+          "value": "appw6NW0ItwCfk0ds",
+          "mode": "list",
+          "cachedResultName": "Untitled Base",
+          "cachedResultUrl": "https://airtable.com/appw6NW0ItwCfk0ds"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblMoHWJIHdsgqYQl",
+          "mode": "list",
+          "cachedResultName": "AgentMemory",
+          "cachedResultUrl": "https://airtable.com/appw6NW0ItwCfk0ds/tblMoHWJIHdsgqYQl"
+        },
+        "id": "={{ $json.id }}"
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1920,
+        960
+      ],
+      "id": "9b010203-8bc5-497a-8547-50dc8d9011fe",
+      "name": "Delete a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ogFPdXdPeyYphkjY",
+          "name": "Airtable Personal Access Token account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Obtiene los datos de ambas consultas de Airtable de forma independiente\nconst historial = $('cunsulta historial1').all();\nconst lowMemory = $('Search LowMemory').all();\n\nreturn [{\n  json: {\n    // Lista compacta del historial (segura si está vacía)\n    historial_compacto: historial.length > 0 \n      ? historial.map(item => ({\n          message: item.json?.fields?.message ?? null,\n          response: item.json?.fields?.response ?? null,\n          created_on: item.json?.fields?.created_on ?? null\n        })) \n      : [],\n      \n    // Datos provenientes del registro de LowMemory (segura si está vacía)\n    low_memory_data: lowMemory.length > 0 \n      ? lowMemory.map(item => ({\n          id: item.json?.id ?? null,\n          asunto_principal: item.json?.fields?.asunto_principal ?? null,\n          puntos_clave: item.json?.fields?.puntos_clave ?? null,\n          accion_requerida: item.json?.fields?.accion_requerida ?? null,\n          session_id: item.json?.fields?.Session_ID ?? null\n        })) \n      : []\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        288
+      ],
+      "id": "1523e32c-8daa-4190-bf1f-45f343f075aa",
+      "name": "parseHistorial"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Obtenemos los elementos de ambos nodos de Airtable\nconst historial = $('cunsulta historial').all();\nconst lowMemory = $('Search LowMemory').all();\n\nreturn [{\n  json: {\n    // Compactamos el historial de los últimos minutos\n    historial_compacto: historial.map(item => ({\n      message: item.json.fields.message,\n      response: item.json.fields.response,\n      created_on: item.json.fields.created_on\n    })),\n    \n    // Traemos la información previa de LowMemory\n    low_memory_data: lowMemory.map(item => ({\n      id: item.json.id,\n      asunto_principal: item.json.fields.asunto_principal || '',\n      puntos_clave: item.json.fields.puntos_clave || '',\n      accion_requerida: item.json.fields.accion_requerida || ''\n    }))\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        864,
+        880
+      ],
+      "id": "cb2006a8-1eca-458d-8baf-dea2cbee52da",
+      "name": "Parse result"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appw6NW0ItwCfk0ds",
+          "mode": "list",
+          "cachedResultName": "Untitled Base",
+          "cachedResultUrl": "https://airtable.com/appw6NW0ItwCfk0ds"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblMoHWJIHdsgqYQl",
+          "mode": "list",
+          "cachedResultName": "AgentMemory",
+          "cachedResultUrl": "https://airtable.com/appw6NW0ItwCfk0ds/tblMoHWJIHdsgqYQl"
+        },
+        "filterByFormula": "=AND({id_chat} = '{{ $('Telegram Trigger').item.json.message.chat.id }}', {agent} = 'agentIaDocu', IS_AFTER({created_on}, DATEADD(NOW(), -30, 'minutes')))",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1696,
+        960
+      ],
+      "id": "c480103e-a734-4442-91b9-460920f5708e",
+      "name": "cunsulta historial2",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ogFPdXdPeyYphkjY",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "NlKEGQymRtKvC3bJ",
+          "mode": "list",
+          "cachedResultName": "incidencias",
+          "cachedResultUrl": "/projects/Oid9NSNdW11bP5VP/datatables/NlKEGQymRtKvC3bJ"
+        }
+      },
+      "type": "n8n-nodes-base.dataTableTool",
+      "typeVersion": 1.1,
+      "position": [
+        -288,
+        1280
+      ],
+      "id": "1daaa117-a0a2-47a6-9190-6be1c6fb143b",
+      "name": "Get row(s) in Data table"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "NlKEGQymRtKvC3bJ",
+          "mode": "list",
+          "cachedResultName": "incidencias",
+          "cachedResultUrl": "/projects/Oid9NSNdW11bP5VP/datatables/NlKEGQymRtKvC3bJ"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('conditions0_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "resolucion": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('resolucion', ``, 'string') }}",
+            "estado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('estado', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "titulo",
+              "displayName": "titulo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "detalle",
+              "displayName": "detalle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "resolucion",
+              "displayName": "resolucion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTableTool",
+      "typeVersion": 1.1,
+      "position": [
+        -192,
+        1376
+      ],
+      "id": "1a4f5e88-0a92-4097-acfa-6e1c136a55fa",
+      "name": "Update row(s) in Data table"
     }
   ],
   "connections": {
@@ -615,12 +1576,12 @@
       "main": [
         [
           {
-            "node": "AI Agent1",
+            "node": "Send a text message3",
             "type": "main",
             "index": 0
           },
           {
-            "node": "Send a text message3",
+            "node": "Search records",
             "type": "main",
             "index": 0
           }
@@ -643,14 +1604,14 @@
         ],
         [
           {
-            "node": "Send a text message1",
+            "node": "Call 'Asistente Totem Verificador de Articulos Precios'",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Agente ia  docu",
+            "node": "Send a text message1",
             "type": "main",
             "index": 0
           }
@@ -706,11 +1667,27 @@
         ]
       ]
     },
+    "Send a text message2": {
+      "main": [
+        [
+          {
+            "node": "Create a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Query Data Tool": {
       "ai_tool": [
         [
           {
             "node": "Agente ia  docu",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "Agente ia  docu1",
             "type": "ai_tool",
             "index": 0
           }
@@ -733,6 +1710,11 @@
         [
           {
             "node": "Agente ia  docu",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Agente ia  docu1",
             "type": "ai_languageModel",
             "index": 0
           }
@@ -768,12 +1750,273 @@
         ]
       ]
     },
-    "Simple Memory": {
+    "Simple Memory1": {
       "ai_memory": [
         [
           {
-            "node": "Agente ia  docu",
+            "node": "AI Agent1",
             "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Insert Data to Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Insert Data to Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Ollama1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Insert Data to Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search records": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "Search LowMemory",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a record": {
+      "main": [
+        [
+          {
+            "node": "cunsulta historial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Parse result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "cunsulta historial": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Create or update a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "cunsulta historial1": {
+      "main": [
+        [
+          {
+            "node": "parseHistorial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search LowMemory": {
+      "main": [
+        [
+          {
+            "node": "cunsulta historial1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Agente ia  docu",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Agente ia  docu1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente ia  docu1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Insert row1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create or update a record": {
+      "main": [
+        [
+          {
+            "node": "cunsulta historial2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parseHistorial": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse result": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "cunsulta historial2": {
+      "main": [
+        [
+          {
+            "node": "Delete a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in Data table": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente ia  docu",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row(s) in Data table": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente ia  docu",
+            "type": "ai_tool",
             "index": 0
           }
         ]
