@@ -1,0 +1,1233 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "chatId": "={{ $('When Executed by Another Workflow').item.json.chatid }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1296,
+        320
+      ],
+      "id": "41c5de8f-1ce6-4ea0-bcca-65609888169b",
+      "name": "Send a text message2",
+      "webhookId": "fb2a9985-8cf6-4af2-92b5-9c2bf86d2e98",
+      "credentials": {
+        "telegramApi": {
+          "id": "LaCSqupB8onn1Ek0",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "knowledge_base",
+        "toolDescription": "usa esta base de conocimiento para responderle al usuario sobre el el producto totem para ayudar al cliente",
+        "memoryKey": {
+          "__rl": true,
+          "value": "AsistenteTotem",
+          "mode": "list",
+          "cachedResultName": "AsistenteTotem"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.2,
+      "position": [
+        960,
+        -464
+      ],
+      "id": "cb5112bf-3191-4671-ae7f-88e5585ebc44",
+      "name": "Query Data Tool"
+    },
+    {
+      "parameters": {
+        "model": "nomic-embed-text:latest"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+      "typeVersion": 1,
+      "position": [
+        960,
+        -48
+      ],
+      "id": "3e61cc7e-1a8a-4d9d-ad96-eaeeb77e80eb",
+      "name": "Embeddings Ollama",
+      "credentials": {
+        "ollamaApi": {
+          "id": "aRHkucMTxkC455Z2",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-6-luna",
+          "mode": "list"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        880,
+        -336
+      ],
+      "id": "f7f76b8a-c2a6-462e-b74f-3d451feaecfb",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "yn53XlLBMDD89Wvi",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "Vhe84E7Ge9XZ4oVR",
+          "mode": "list",
+          "cachedResultName": "errors",
+          "cachedResultUrl": "/projects/Oid9NSNdW11bP5VP/datatables/Vhe84E7Ge9XZ4oVR"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "detalle": "=error Respuesta CompañeroIA : {{ $('When Executed by Another Workflow').item.json.mensaje }}",
+            "contacto": "={{ $('When Executed by Another Workflow').item.json.chatid }} - {{ $('When Executed by Another Workflow').item.json.name }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "detalle",
+              "displayName": "detalle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "contacto",
+              "displayName": "contacto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1664,
+        -480
+      ],
+      "id": "439e1db9-1eda-443f-a1a7-1f35bb6a53b4",
+      "name": "Insert row1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('When Executed by Another Workflow').item.json.mensaje }}",
+        "options": {
+          "systemMessage": "=[INICIO DE CONTEXTO COMPARTIDO]\nEl usuario se llama {{ $('When Executed by Another Workflow').item.json.name }}. \nEl contexto de su última charla reciente es:\n{{ $json.historial_compacto.map(item => `Usuario: ${item.message}\\nRespuesta: ${item.response}`).join('\\n\\n') }}\n\nInformación previa resumida (Low Memory):\n- Asunto principal: {{ $json.low_memory_data[0]?.asunto_principal || 'N/A' }}\n- Puntos clave: {{ $json.low_memory_data[0]?.puntos_clave || 'N/A' }}\n- Acción requerida: {{ $json.low_memory_data[0]?.accion_requerida || 'N/A' }}\n[FIN DE CONTEXTO COMPARTIDO]\n\nEres un asistente técnico de la empresa Mostaza y gestor de incidencias. Tu función es buscar información en la knowledge_base y consultar o actualizar el estado de las incidencias en la tabla correspondiente.\n\nEstados permitidos para gestionar las incidencias:\n- Ingresado\n- En proceso\n- Solucionado\n- Rechazado\n\nUtiliza las herramientas disponibles para consultar el historial e incidencias existentes, no inventes información y redacta una respuesta clara y profesional para un compañero técnico. Si no tiene una consulta clara, explica que no entendiste."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        960,
+        -912
+      ],
+      "id": "7b94f23e-d60d-4128-887e-4c3d7a41d196",
+      "name": "Agente ia  docu",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "sendTo": "mda.acosta94@gmail.com",
+        "subject": "ERROR LOCOOOOOOO",
+        "message": "ojo se rompio el agente de tu agente  reviasa la bdd de errores",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1888,
+        -480
+      ],
+      "id": "34a8cafa-245c-4358-a349-0626e5d8b82a",
+      "name": "Send a message",
+      "webhookId": "5d2d9342-b445-403a-b8b9-569bf73d1b22",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "zhpWMWEwnY0RMirr",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appw6NW0ItwCfk0ds",
+          "mode": "list",
+          "cachedResultName": "Untitled Base",
+          "cachedResultUrl": "https://airtable.com/appw6NW0ItwCfk0ds"
+        },
+        "table": {
+          "__rl": true,
+          "value": "=tblMoHWJIHdsgqYQl",
+          "mode": "id"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id_chat": "={{ $('When Executed by Another Workflow').item.json.chatid }}",
+            "message": "={{ $('When Executed by Another Workflow').item.json.mensaje }}",
+            "agent": "agentIaDocu",
+            "response": "={{ $json.result.text }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "id_chat",
+              "displayName": "id_chat",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "agent",
+              "displayName": "agent",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "created_on",
+              "displayName": "created_on",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "response",
+              "displayName": "response",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1472,
+        320
+      ],
+      "id": "19fe8553-903a-4dcc-af29-4c818c9dfb11",
+      "name": "Create a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ogFPdXdPeyYphkjY",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8d62edb3-7456-47cf-89cd-1db8263584f8",
+              "leftValue": "={{ $input.all().length }}",
+              "rightValue": 5,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1824,
+        320
+      ],
+      "id": "2d196f5e-29f8-4271-98a7-2eb132c6ae8a",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appw6NW0ItwCfk0ds",
+          "mode": "list",
+          "cachedResultName": "Untitled Base",
+          "cachedResultUrl": "https://airtable.com/appw6NW0ItwCfk0ds"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblMoHWJIHdsgqYQl",
+          "mode": "list",
+          "cachedResultName": "AgentMemory",
+          "cachedResultUrl": "https://airtable.com/appw6NW0ItwCfk0ds/tblMoHWJIHdsgqYQl"
+        },
+        "filterByFormula": "=AND({id_chat} = '{{ $('When Executed by Another Workflow').item.json.chatid }}', {agent} = 'agentIaDocu', IS_AFTER({created_on}, DATEADD(NOW(), -30, 'minutes')))",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1632,
+        320
+      ],
+      "id": "17aebc2a-d3eb-4ccd-afaf-765b5742f798",
+      "name": "cunsulta historial",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ogFPdXdPeyYphkjY",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appw6NW0ItwCfk0ds",
+          "mode": "list",
+          "cachedResultName": "Untitled Base",
+          "cachedResultUrl": "https://airtable.com/appw6NW0ItwCfk0ds"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblMoHWJIHdsgqYQl",
+          "mode": "list",
+          "cachedResultName": "AgentMemory",
+          "cachedResultUrl": "https://airtable.com/appw6NW0ItwCfk0ds/tblMoHWJIHdsgqYQl"
+        },
+        "filterByFormula": "=AND({id_chat} = '{{ $('When Executed by Another Workflow').item.json.chatid }}', {agent} = 'agentIaDocu', DATEADD(NOW(), -30, 'minutes'))\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        176,
+        0
+      ],
+      "id": "3664ca9f-b8f9-44bf-b000-fdb5c38dddec",
+      "name": "cunsulta historial1",
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ogFPdXdPeyYphkjY",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appw6NW0ItwCfk0ds",
+          "mode": "list",
+          "cachedResultName": "Untitled Base",
+          "cachedResultUrl": "https://airtable.com/appw6NW0ItwCfk0ds"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblql7ypazosyGCZy",
+          "mode": "list",
+          "cachedResultName": "LowAgentMemory",
+          "cachedResultUrl": "https://airtable.com/appw6NW0ItwCfk0ds/tblql7ypazosyGCZy"
+        },
+        "filterByFormula": "=AND({Session_ID} = '{{ $json.chatid }}', {agent} = 'agentIaDocu', DATEADD(NOW(), -30, 'minutes'))",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "d39c2c89-8fff-4adc-8dd2-7d26b6348b64",
+      "name": "Search LowMemory",
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ogFPdXdPeyYphkjY",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b901f04a-095e-4342-9dbe-16805d1cf139",
+              "leftValue": "={{ $('cunsulta historial1').all().length}}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "81a36817-c89c-4484-8d5b-7b6647b53463",
+              "leftValue": "={{ $('Search LowMemory').all().length}}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        624,
+        0
+      ],
+      "id": "6293c6cd-e2ae-4e39-bcea-767c5fe037b8",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('When Executed by Another Workflow').item.json.mensaje }}",
+        "options": {
+          "systemMessage": "Eres un asistente tecnico  de la empresa mostaza\nUtiliza la knowledge_base para buscar informacion sobre la consulta.\nno inventes informacion y redacta una respuesta para un conpañero tecnico.\nSi no tiene una consulta clara explica que no entendiste"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        832,
+        128
+      ],
+      "id": "8ffcb185-3aa6-4845-b864-b0a8ba9cb435",
+      "name": "Agente ia  docu1",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-6-luna",
+          "mode": "list",
+          "cachedResultName": "gpt-6-luna"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        2336,
+        608
+      ],
+      "id": "f4d106d1-cb89-4e60-bf3c-e0ddb8055cd5",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "yn53XlLBMDD89Wvi",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"asunto_principal\": { \"type\": \"string\" },\n    \"puntos_clave\": { \n      \"type\": \"array\", \n      \"items\": { \"type\": \"string\" } \n    },\n    \"accion_requerida\": { \"type\": \"string\" }\n  },\n  \"required\": [\"asunto_principal\", \"puntos_clave\", \"accion_requerida\"]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2624,
+        656
+      ],
+      "id": "bfc86dd7-fd2a-4634-bc90-64512bb6f032",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "appw6NW0ItwCfk0ds",
+          "mode": "list",
+          "cachedResultName": "Untitled Base",
+          "cachedResultUrl": "https://airtable.com/appw6NW0ItwCfk0ds"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblql7ypazosyGCZy",
+          "mode": "list",
+          "cachedResultName": "LowAgentMemory",
+          "cachedResultUrl": "https://airtable.com/appw6NW0ItwCfk0ds/tblql7ypazosyGCZy"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Fecha de actualización": "={{ $now }}",
+            "asunto_principal": "={{ $json.output.asunto_principal }}",
+            "accion_requerida": "={{ $json.output.accion_requerida }}",
+            "agent": "agentIaDocu",
+            "puntos_clave": "={{ $json.output.puntos_clave.join(', ') }}",
+            "Session_ID": "={{ $('When Executed by Another Workflow').item.json.chatid }}"
+          },
+          "matchingColumns": [
+            "Session_ID"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Session_ID",
+              "displayName": "Session_ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Fecha de actualización",
+              "displayName": "Fecha de actualización",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "asunto_principal",
+              "displayName": "asunto_principal",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "puntos_clave",
+              "displayName": "puntos_clave",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "accion_requerida",
+              "displayName": "accion_requerida",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "agent",
+              "displayName": "agent",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2832,
+        496
+      ],
+      "id": "a4fa446a-44de-4ac3-a4cf-2ecf72aa6983",
+      "name": "Create or update a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ogFPdXdPeyYphkjY",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "deleteRecord",
+        "base": {
+          "__rl": true,
+          "value": "appw6NW0ItwCfk0ds",
+          "mode": "list",
+          "cachedResultName": "Untitled Base",
+          "cachedResultUrl": "https://airtable.com/appw6NW0ItwCfk0ds"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblMoHWJIHdsgqYQl",
+          "mode": "list",
+          "cachedResultName": "AgentMemory",
+          "cachedResultUrl": "https://airtable.com/appw6NW0ItwCfk0ds/tblMoHWJIHdsgqYQl"
+        },
+        "id": "={{ $json.id }}"
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        3232,
+        528
+      ],
+      "id": "39606f3e-9d83-4321-a822-5f4bd4f90188",
+      "name": "Delete a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ogFPdXdPeyYphkjY",
+          "name": "Airtable Personal Access Token account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Obtiene los datos de ambas consultas de Airtable de forma independiente\nconst historial = $('cunsulta historial1').all();\nconst lowMemory = $('Search LowMemory').all();\n\nreturn [{\n  json: {\n    // Lista compacta del historial (segura si está vacía)\n    historial_compacto: historial.length > 0 \n      ? historial.map(item => ({\n          message: item.json?.fields?.message ?? null,\n          response: item.json?.fields?.response ?? null,\n          created_on: item.json?.fields?.created_on ?? null\n        })) \n      : [],\n      \n    // Datos provenientes del registro de LowMemory (segura si está vacía)\n    low_memory_data: lowMemory.length > 0 \n      ? lowMemory.map(item => ({\n          id: item.json?.id ?? null,\n          asunto_principal: item.json?.fields?.asunto_principal ?? null,\n          puntos_clave: item.json?.fields?.puntos_clave ?? null,\n          accion_requerida: item.json?.fields?.accion_requerida ?? null,\n          session_id: item.json?.fields?.Session_ID ?? null\n        })) \n      : []\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        0
+      ],
+      "id": "d8a9c84e-6454-46a2-a895-5a59e93dce3e",
+      "name": "parseHistorial"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Obtenemos los elementos de ambos nodos de Airtable\nconst historial = $('cunsulta historial').all();\nconst lowMemory = $('Search LowMemory').all();\n\nreturn [{\n  json: {\n    // Compactamos el historial de los últimos minutos\n    historial_compacto: historial.map(item => ({\n      message: item.json.fields.message,\n      response: item.json.fields.response,\n      created_on: item.json.fields.created_on\n    })),\n    \n    // Traemos la información previa de LowMemory\n    low_memory_data: lowMemory.map(item => ({\n      id: item.json.id,\n      asunto_principal: item.json.fields.asunto_principal || '',\n      puntos_clave: item.json.fields.puntos_clave || '',\n      accion_requerida: item.json.fields.accion_requerida || ''\n    }))\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2176,
+        448
+      ],
+      "id": "81790ffe-2d9c-4b3e-aba3-afdec2129d3a",
+      "name": "Parse result"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appw6NW0ItwCfk0ds",
+          "mode": "list",
+          "cachedResultName": "Untitled Base",
+          "cachedResultUrl": "https://airtable.com/appw6NW0ItwCfk0ds"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblMoHWJIHdsgqYQl",
+          "mode": "list",
+          "cachedResultName": "AgentMemory",
+          "cachedResultUrl": "https://airtable.com/appw6NW0ItwCfk0ds/tblMoHWJIHdsgqYQl"
+        },
+        "filterByFormula": "=AND({id_chat} = '{{ $('When Executed by Another Workflow').item.json.chatid }}', {agent} = 'agentIaDocu', IS_AFTER({created_on}, DATEADD(NOW(), -30, 'minutes')))",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        3008,
+        528
+      ],
+      "id": "17ccc246-81d3-4bc1-8411-371b056fe6c2",
+      "name": "cunsulta historial2",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ogFPdXdPeyYphkjY",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "NlKEGQymRtKvC3bJ",
+          "mode": "list",
+          "cachedResultName": "incidencias",
+          "cachedResultUrl": "/projects/Oid9NSNdW11bP5VP/datatables/NlKEGQymRtKvC3bJ"
+        }
+      },
+      "type": "n8n-nodes-base.dataTableTool",
+      "typeVersion": 1.1,
+      "position": [
+        1248,
+        -496
+      ],
+      "id": "3609d4c9-972c-4f42-a788-d2e1a1e181bd",
+      "name": "Get row(s) in Data table"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "NlKEGQymRtKvC3bJ",
+          "mode": "list",
+          "cachedResultName": "incidencias",
+          "cachedResultUrl": "/projects/Oid9NSNdW11bP5VP/datatables/NlKEGQymRtKvC3bJ"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('conditions0_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "resolucion": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('resolucion', ``, 'string') }}",
+            "estado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('estado', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "titulo",
+              "displayName": "titulo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "detalle",
+              "displayName": "detalle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "resolucion",
+              "displayName": "resolucion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTableTool",
+      "typeVersion": 1.1,
+      "position": [
+        1344,
+        -400
+      ],
+      "id": "ca5a2933-ac03-4932-ae78-ffc9b7c21579",
+      "name": "Update row(s) in Data table"
+    },
+    {
+      "parameters": {
+        "inputSource": "jsonExample",
+        "jsonExample": "{\n\"mensaje\": \n\"me dicen que un local no tiene internet\", \n\"chatid\": \n\"1792887193\",\n  \"name\": \"Mariano\"\n  \n}"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -272,
+        16
+      ],
+      "id": "637a7196-a3a5-46fe-ad49-48b34f3b6c0a",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.historial_compacto.map(item => `Usuario: ${item.message}\\nRespuesta: ${item.response}`).join('\\n\\n') }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Eres un asistente experto en análisis de conversaciones. Analiza el historial provisto y extrae la información requerida estrictamente en formato JSON válido, sin texto adicional ni bloques de código markdown extra, siguiendo este esquema:\n{\n  \"asunto_principal\": \"string\",\n  \"puntos_clave\": [\"string\"],\n  \"accion_requerida\": \"string\"\n}",
+          "maxIterations": 10
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        2448,
+        448
+      ],
+      "id": "bebb6aff-9c78-4a9f-8273-5cc6f79abe29",
+      "name": "Agente Resumidor"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('When Executed by Another Workflow').item.json.chatid }}",
+        "text": "Lo siento ahora no puedo atenderte",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2112,
+        -480
+      ],
+      "id": "01afde66-6a1f-4551-a2a6-06a9a2aece77",
+      "name": "Send a text message",
+      "webhookId": "7ecfa73e-7d6b-4502-8f94-ec4ed9a0ba28",
+      "credentials": {
+        "telegramApi": {
+          "id": "BtVQEsxtp2bQgTfr",
+          "name": "LechuguinBot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Send a text message2": {
+      "main": [
+        [
+          {
+            "node": "Create a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Data Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente ia  docu",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "Agente ia  docu1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Ollama": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Query Data Tool",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente ia  docu",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Agente ia  docu1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert row1": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente ia  docu": {
+      "main": [
+        [
+          {
+            "node": "Send a text message2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Insert row1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a record": {
+      "main": [
+        [
+          {
+            "node": "cunsulta historial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Parse result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "cunsulta historial": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "cunsulta historial1": {
+      "main": [
+        [
+          {
+            "node": "parseHistorial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search LowMemory": {
+      "main": [
+        [
+          {
+            "node": "cunsulta historial1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Agente ia  docu",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Agente ia  docu1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente ia  docu1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Insert row1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente Resumidor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Agente Resumidor",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create or update a record": {
+      "main": [
+        [
+          {
+            "node": "cunsulta historial2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parseHistorial": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse result": {
+      "main": [
+        [
+          {
+            "node": "Agente Resumidor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "cunsulta historial2": {
+      "main": [
+        [
+          {
+            "node": "Delete a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in Data table": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente ia  docu",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "Agente ia  docu1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row(s) in Data table": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente ia  docu",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "Agente ia  docu1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Search LowMemory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente Resumidor": {
+      "main": [
+        [
+          {
+            "node": "Create or update a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "mensaje": "me dicen que un local no tiene internet",
+        "chatid": "1792887193",
+        "name": "Mariano"
+      }
+    ]
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "dea47ab8da2b7cc698fb9ff4bd68a2953a1e3c919cf1e296c03fad42edadfc7b"
+  }
+}
